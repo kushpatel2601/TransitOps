@@ -28,12 +28,42 @@ const API_BASE = window.location.origin + '/api';
 
 // ---- Bootstrap the page once DOM is ready ----
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await refreshUserFromServer();
     loadUserInfo();
     loadDashboardData();
     setupSidebarToggle();
     setupLogout();
 });
+
+
+/**
+ * Fetches fresh permissions from /api/auth/me and updates localStorage.
+ * Prevents stale-token RBAC issues when role permissions change server-side.
+ */
+async function refreshUserFromServer() {
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('transitops_token');
+            localStorage.removeItem('transitops_user');
+            window.location.href = '/';
+            return;
+        }
+        const result = await res.json();
+        if (result.success && result.user) {
+            localStorage.setItem('transitops_user', JSON.stringify({
+                id:          result.user.id,
+                fullName:    result.user.fullName,
+                email:       result.user.email,
+                role:        result.user.role,
+                permissions: result.user.permissions
+            }));
+        }
+    } catch (_) { /* network error — proceed with cached data */ }
+}
 
 
 /**
@@ -258,37 +288,37 @@ function renderVehicleStatus(statuses) {
  */
 function getVehicleStatusClass(status) {
     const classMap = {
-        'available': 'completed',       // Green badge
-        'active': 'on-trip',            // Blue badge
-        'maintenance': 'delayed',       // Orange badge
-        'inactive': 'cancelled',        // Red badge
-        
-        // fallback matching trip statuses
-        'in_progress': 'on-trip',
-        'completed': 'completed',
-        'scheduled': 'dispatched',
-        'cancelled': 'cancelled',
-        'delayed': 'delayed'
+        // vehicle statuses
+        'available':  'completed',    // green badge
+        'on_trip':    'on-trip',      // blue badge
+        'maintenance':'delayed',      // orange badge
+        'inactive':   'cancelled',    // grey badge
+
+        // trip statuses (spec §3.5 lifecycle)
+        'draft':      'draft',
+        'dispatched': 'dispatched',
+        'completed':  'completed',
+        'cancelled':  'cancelled'
     };
     return classMap[status] || 'draft';
 }
 
 /**
- * Format a vehicle status (from Fleet page) for human-readable display.
+ * Format a vehicle or trip status for human-readable display.
  */
 function formatVehicleStatus(status) {
     const displayMap = {
-        'available': 'Available',
-        'active': 'On Trip',
-        'maintenance': 'In Shop',
-        'inactive': 'Retired',
-        
-        // fallback matching trip statuses
-        'in_progress': 'On Trip',
-        'completed': 'Completed',
-        'scheduled': 'Dispatched',
-        'cancelled': 'Cancelled',
-        'delayed': 'Delayed'
+        // vehicle statuses
+        'available':  'Available',
+        'on_trip':    'On Trip',
+        'maintenance':'In Shop',
+        'inactive':   'Retired',
+
+        // trip statuses
+        'draft':      'Draft',
+        'dispatched': 'Dispatched',
+        'completed':  'Completed',
+        'cancelled':  'Cancelled'
     };
     return displayMap[status] || 'Available';
 }
@@ -298,26 +328,24 @@ function formatVehicleStatus(status) {
  */
 function getStatusClass(status) {
     const classMap = {
-        'in_progress': 'on-trip',
-        'completed': 'completed',
-        'scheduled': 'dispatched',
-        'cancelled': 'cancelled',
-        'delayed': 'delayed'
+        'draft':      'draft',
+        'dispatched': 'dispatched',
+        'completed':  'completed',
+        'cancelled':  'cancelled'
     };
     return classMap[status] || 'draft';
 }
 
 /**
  * Format a trip status for display.
- * e.g. "in_progress" → "On Trip"
+ * e.g. "dispatched" → "Dispatched"
  */
 function formatStatus(status) {
     const displayMap = {
-        'in_progress': 'On Trip',
-        'completed': 'Completed',
-        'scheduled': 'Dispatched',
-        'cancelled': 'Cancelled',
-        'delayed': 'Delayed'
+        'draft':      'Draft',
+        'dispatched': 'Dispatched',
+        'completed':  'Completed',
+        'cancelled':  'Cancelled'
     };
     return displayMap[status] || 'Draft';
 }

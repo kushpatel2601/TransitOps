@@ -28,7 +28,8 @@ let vehiclesList = [];
 
 // ---- Page Initialization ----
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await refreshUserFromServer();
     loadUserInfo();
     loadVehicles();
     setupFilters();
@@ -36,6 +37,31 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSidebarToggle();
     setupLogout();
 });
+
+
+async function refreshUserFromServer() {
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('transitops_token');
+            localStorage.removeItem('transitops_user');
+            window.location.href = '/';
+            return;
+        }
+        const result = await res.json();
+        if (result.success && result.user) {
+            localStorage.setItem('transitops_user', JSON.stringify({
+                id:          result.user.id,
+                fullName:    result.user.fullName,
+                email:       result.user.email,
+                role:        result.user.role,
+                permissions: result.user.permissions
+            }));
+        }
+    } catch (_) { /* network error — proceed with cached data */ }
+}
 
 
 /**
@@ -191,27 +217,28 @@ function formatCapacity(val, type) {
 }
 
 /**
- * Formats database status strings to look human-readable.
+ * Formats vehicle DB status values to human-readable labels.
+ * Spec §3.3: Available | On Trip | In Shop | Retired
  */
 function formatStatusText(status) {
     const statusMap = {
-        'available': 'Available',
-        'active': 'On Trip',
+        'available':   'Available',
+        'on_trip':     'On Trip',
         'maintenance': 'In Shop',
-        'inactive': 'Retired'
+        'inactive':    'Retired'
     };
     return statusMap[status] || status;
 }
 
 /**
- * Maps DB status key to style class name.
+ * Maps DB status key to a CSS class name for badge styling.
  */
 function getStatusClass(status) {
     const map = {
-        'available': 'available',
-        'active': 'active',
+        'available':   'available',
+        'on_trip':     'active',       // reuse .active badge colour (blue)
         'maintenance': 'maintenance',
-        'inactive': 'inactive'
+        'inactive':    'inactive'
     };
     return map[status] || 'available';
 }

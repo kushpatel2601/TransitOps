@@ -229,73 +229,55 @@ async function updateDriver(req, res) {
                     `, [vehicleId]);
                 }
             } else if (status === 'active') {
-                // Check if driver already has an active or scheduled trip
+                // When a driver becomes available again, check if they have a live dispatched trip
                 const hasActiveTrip = await db.query(`
-                    SELECT id FROM trips 
-                    WHERE driver_id = $1 AND status IN ('in_progress', 'scheduled')
+                    SELECT id FROM trips
+                    WHERE driver_id = $1 AND status = 'dispatched'
                     LIMIT 1
                 `, [id]);
-                
+
                 if (hasActiveTrip.rows.length === 0) {
-                    // Find a vehicle that has status = 'available' and currently has no active/scheduled trip with a driver
+                    // No live trip — find an available vehicle that has a dispatched trip with no driver
                     const vehicleResult = await db.query(`
-                        SELECT v.id 
+                        SELECT v.id
                         FROM vehicles v
-                        LEFT JOIN trips t ON t.vehicle_id = v.id AND t.status IN ('in_progress', 'scheduled')
-                        WHERE v.status = 'available' 
+                        LEFT JOIN trips t ON t.vehicle_id = v.id AND t.status = 'dispatched'
+                        WHERE v.status = 'available'
                           AND (t.id IS NULL OR t.driver_id IS NULL)
-                        ORDER BY v.created_at ASC 
+                        ORDER BY v.created_at ASC
                         LIMIT 1
                     `);
-                    
+
                     if (vehicleResult.rows.length > 0) {
                         const vehicleId = vehicleResult.rows[0].id;
-                        
-                        // Check if there is an active/scheduled trip for this vehicle with no driver
-                        const activeTripResult = await db.query(`
-                            SELECT id 
-                            FROM trips 
-                            WHERE vehicle_id = $1 AND status IN ('in_progress', 'scheduled') AND driver_id IS NULL
+
+                        // Try to assign the driver to an existing driverless dispatched trip
+                        const driverlessTripResult = await db.query(`
+                            SELECT id
+                            FROM trips
+                            WHERE vehicle_id = $1 AND status = 'dispatched' AND driver_id IS NULL
                             LIMIT 1
                         `, [vehicleId]);
-                        
-                        if (activeTripResult.rows.length > 0) {
-                            // Update the existing trip to assign this driver
+
+                        if (driverlessTripResult.rows.length > 0) {
                             await db.query(`
-                                UPDATE trips 
-                                SET driver_id = $1, updated_at = NOW() 
+                                UPDATE trips
+                                SET driver_id = $1, updated_at = NOW()
                                 WHERE id = $2
-                            `, [id, activeTripResult.rows[0].id]);
-                        } else {
-                            // Create a new scheduled trip to assign this driver to the vehicle
-                            const routeResult = await db.query(`
-                                SELECT id FROM routes WHERE status = 'active' ORDER BY id LIMIT 1
-                            `);
-                            const routeId = routeResult.rows.length > 0 ? routeResult.rows[0].id : null;
-                            
-                            await db.query(`
-                                INSERT INTO trips (route_id, vehicle_id, driver_id, departure_time, status)
-                                VALUES ($1, $2, $3, NOW() + INTERVAL '1 hour', 'scheduled')
-                            `, [routeId, vehicleId, id]);
+                            `, [id, driverlessTripResult.rows[0].id]);
                         }
-                        
-                        // Update the vehicle's status to 'active' (On Trip)
-                        await db.query(`
-                            UPDATE vehicles 
-                            SET status = 'active', updated_at = NOW() 
-                            WHERE id = $1
-                        `, [vehicleId]);
+                        // No auto-created draft trips — dispatcher must create trips explicitly
                     }
                 } else {
-                    // If the driver already has an active trip, make sure their vehicle is marked as active
+                    // Driver already has a live dispatched trip — make sure their vehicle is on_trip too
                     const tripResult = await db.query(`
-                        SELECT vehicle_id FROM trips 
-                        WHERE driver_id = $1 AND status IN ('in_progress', 'scheduled')
+                        SELECT vehicle_id FROM trips
+                        WHERE driver_id = $1 AND status = 'dispatched'
                         ORDER BY departure_time DESC LIMIT 1
                     `, [id]);
                     if (tripResult.rows.length > 0 && tripResult.rows[0].vehicle_id) {
                         await db.query(`
-                            UPDATE vehicles SET status = 'active', updated_at = NOW() WHERE id = $1
+                            UPDATE vehicles SET status = 'on_trip', updated_at = NOW() WHERE id = $1
                         `, [tripResult.rows[0].vehicle_id]);
                     }
                 }

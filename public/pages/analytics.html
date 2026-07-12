@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TransitOps Analytics — Fuel efficiency, fleet utilization, operational cost breakdown, and monthly revenue trends.">
+    <title>TransitOps — Analytics</title>
+
+    <!-- shared design tokens and component styles -->
+    <link rel="stylesheet" href="/css/global.css">
+    <!-- sidebar, topbar, page shell -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <!-- analytics-specific: KPI tiles, bar chart, cost bars -->
+    <link rel="stylesheet" href="/css/analytics.css">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚍</text></svg>">
+</head>
+<body>
+
+    <!-- dark backdrop shown behind the sidebar on mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-layout">
+
+        <!-- ==================== SIDEBAR ==================== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <h1>TransitOps</h1>
+            </div>
+
+            <!-- data-module is used by JS to apply RBAC gating -->
+            <nav class="sidebar-nav" id="sidebarNav">
+                <a href="/dashboard"     class="nav-link" data-module="dashboard">     <span class="nav-icon">📊</span> Dashboard</a>
+                <a href="/fleet"         class="nav-link" data-module="vehicles">      <span class="nav-icon">🚍</span> Fleet</a>
+                <a href="/drivers"       class="nav-link" data-module="drivers">       <span class="nav-icon">👤</span> Drivers</a>
+                <a href="/trips"         class="nav-link" data-module="trips">         <span class="nav-icon">🗺️</span> Trips</a>
+                <a href="/maintenance"   class="nav-link" data-module="maintenance">   <span class="nav-icon">🔧</span> Maintenance</a>
+                <a href="/fuel-expenses" class="nav-link" data-module="fuel_expenses"> <span class="nav-icon">⛽</span> Fuel & Expenses</a>
+                <a href="/analytics"     class="nav-link active" data-module="reports"><span class="nav-icon">📈</span> Analytics</a>
+                <a href="/settings"      class="nav-link" data-module="settings">      <span class="nav-icon">⚙️</span> Settings</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-sidebar-logout" id="logoutBtn">🚪 Logout</button>
+            </div>
+        </aside>
+        <!-- ================ END SIDEBAR ================ -->
+
+
+        <!-- ==================== MAIN CONTENT ==================== -->
+        <div class="main-content">
+
+            <!-- top bar: hamburger | search | user + role -->
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Menu">☰</button>
+                <div class="topbar-search">
+                    <input
+                        type="text"
+                        class="search-input"
+                        id="globalSearch"
+                        placeholder="Search..."
+                        aria-label="Search"
+                    >
+                </div>
+                <div class="topbar-actions">
+                    <span class="user-name" id="userName">User</span>
+                    <div class="role-badge" id="roleBadge">—</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+
+                <!-- page header: title on left, Export CSV button on right -->
+                <div class="analytics-page-header">
+                    <h2 class="page-title">Reports &amp; Analytics</h2>
+                    <button class="btn-export-csv" id="exportCsvBtn" title="Download analytics data as CSV">
+                        ⬇ Export CSV
+                    </button>
+                </div>
+
+                <!-- ---- 5 KPI tiles row ---- -->
+                <div class="analytics-kpi-grid" id="analyticsKpiGrid">
+
+                    <div class="analytics-kpi-card">
+                        <div class="akpi-label">FUEL EFFICIENCY</div>
+                        <div class="akpi-value" id="kpiFuelEfficiency">—</div>
+                    </div>
+
+                    <div class="analytics-kpi-card akpi-accent-blue">
+                        <div class="akpi-label">FLEET UTILIZATION</div>
+                        <div class="akpi-value" id="kpiFleetUtil">—</div>
+                    </div>
+
+                    <div class="analytics-kpi-card akpi-accent-orange">
+                        <div class="akpi-label">OPERATIONAL COST</div>
+                        <div class="akpi-value" id="kpiOpCost">—</div>
+                    </div>
+
+                    <div class="analytics-kpi-card">
+                        <div class="akpi-label">VEHICLE IDLE RATE</div>
+                        <div class="akpi-value" id="kpiIdleRate">—</div>
+                    </div>
+
+                    <div class="analytics-kpi-card akpi-accent-green">
+                        <div class="akpi-label">AVG VEHICLE ROI</div>
+                        <div class="akpi-value" id="kpiVehicleRoi">—</div>
+                    </div>
+
+                </div>
+                <!-- end KPI grid -->
+
+
+                <!-- breadcrumb cost breakdown hint — matches wireframe label -->
+                <div class="analytics-breadcrumb" id="costBreakcrumb">
+                    KPIs → Operational → Fuel / Acquisition Cost
+                </div>
+
+
+                <!-- ---- Bottom section: bar chart + top vehicles ---- -->
+                <div class="analytics-bottom">
+
+                    <!-- monthly revenue / cost bar chart -->
+                    <div class="panel analytics-chart-panel">
+                        <h3 class="panel-title">MONTHLY REVENUE</h3>
+
+                        <!--
+                            The chart is drawn with inline SVG by analytics.js.
+                            We give it a container div and let JS size it properly.
+                        -->
+                        <div class="bar-chart-wrap" id="monthlyBarChart">
+                            <div class="loading-text">Loading chart...</div>
+                        </div>
+
+                        <!-- x-axis month labels rendered below the bars -->
+                        <div class="bar-chart-labels" id="monthlyBarLabels"></div>
+                    </div>
+
+
+                    <!-- top 5 costliest vehicles horizontal bars -->
+                    <div class="panel analytics-vehicles-panel">
+                        <h3 class="panel-title">TOP COSTLIEST VEHICLES</h3>
+                        <div class="top-vehicles-list" id="topVehiclesList">
+                            <div class="loading-text">Loading...</div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- end analytics-bottom -->
+
+            </div>
+            <!-- end page-content -->
+
+        </div>
+        <!-- end main-content -->
+
+    </div>
+    <!-- end app-layout -->
+
+    <script src="/js/analytics.js"></script>
+</body>
+</html>

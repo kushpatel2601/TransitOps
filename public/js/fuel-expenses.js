@@ -35,10 +35,28 @@ let expensesList  = [];
 
 
 // ============================================================
-// Initialisation
+// Initialisation — refresh permissions from the server first,
+// then boot the page so RBAC is never stale
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Always fetch the latest permissions from the server before
+    // applying RBAC — this prevents stale-token issues where a role
+    // permission was updated after the user last logged in.
+    await refreshUserFromServer();
+
+    // Check module access with the freshly-updated permissions
+    try {
+        const freshUser = JSON.parse(localStorage.getItem('transitops_user') || '{}');
+        if (freshUser.permissions && freshUser.permissions['fuel_expenses'] === false) {
+            window.location.href = '/dashboard';
+            return;
+        }
+    } catch (_) {
+        window.location.href = '/';
+        return;
+    }
+
     loadUserInfo();
     loadVehicles();
     loadFuelLogs();
@@ -49,6 +67,43 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSidebarToggle();
     setupLogout();
 });
+
+
+/**
+ * Calls GET /api/auth/me and syncs the stored user object in
+ * localStorage with the latest permissions from the database.
+ * This ensures RBAC sidebar gating is always current even when
+ * role permissions are changed without requiring a re-login.
+ */
+async function refreshUserFromServer() {
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 401 || res.status === 403) {
+            // token is invalid or expired — force re-login
+            localStorage.removeItem('transitops_token');
+            localStorage.removeItem('transitops_user');
+            window.location.href = '/';
+            return;
+        }
+
+        const result = await res.json();
+        if (result.success && result.user) {
+            // Overwrite the cached user object with fresh data from DB
+            localStorage.setItem('transitops_user', JSON.stringify({
+                id:          result.user.id,
+                fullName:    result.user.fullName,
+                email:       result.user.email,
+                role:        result.user.role,
+                permissions: result.user.permissions
+            }));
+        }
+    } catch (_) {
+        // Network error — proceed with cached data rather than blocking the page
+    }
+}
 
 
 // ============================================================

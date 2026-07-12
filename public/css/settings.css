@@ -1,0 +1,229 @@
+/*
+ * settings.css
+ * -------------------------------------------
+ * Styles for the Settings & RBAC page.
+ *
+ * Covers:
+ *  - Two-column layout (general form + RBAC table)
+ *  - Form inputs and Save Changes button
+ *  - Inline field error messages
+ *  - Page-level feedback banner
+ *  - RBAC permission matrix table (✓ / — cells)
+ *  - Responsive collapse for smaller screens
+ * -------------------------------------------
+ */
+
+
+/* ---- Page feedback banner (success / error) ---- */
+
+.settings-banner {
+    display: none;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    margin-bottom: var(--space-lg);
+    animation: bannerSlide 0.25s ease;
+}
+
+.settings-banner.show-success {
+    display: block;
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.settings-banner.show-error {
+    display: block;
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+@keyframes bannerSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ---- Two-column layout: form left, RBAC table right ---- */
+
+.settings-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-xl);
+    align-items: start;
+}
+
+
+/* ---- Left panel — general settings form ---- */
+
+.settings-general-panel {
+    padding: var(--space-lg);
+}
+
+.settings-general-panel .form-group {
+    margin-bottom: var(--space-md);
+}
+
+/* small uppercase label above each input */
+.settings-general-panel label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.3rem;
+}
+
+/* input style — same as the rest of the app */
+.settings-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.settings-input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+/* red border when JS marks a field invalid */
+.settings-input.invalid {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 2px var(--color-danger-bg);
+}
+
+/* per-field inline error message */
+.field-error {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--color-danger);
+    margin-top: 0.2rem;
+    min-height: 1em; /* reserve space so layout doesn't jump */
+}
+
+
+/* ---- Save Changes button ---- */
+
+.btn-save-settings {
+    width: 100%;
+    padding: 0.65rem;
+    margin-top: var(--space-md);
+    background-color: var(--color-info); /* blue — matches wireframe */
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-save-settings:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+}
+
+.btn-save-settings:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* ---- Right panel — RBAC permission matrix ---- */
+
+.settings-rbac-panel {
+    overflow-x: auto;
+    padding: var(--space-lg);
+}
+
+/* the table itself */
+.rbac-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+/* header row */
+.rbac-table thead th {
+    text-align: center;
+    padding: 0.6rem 0.8rem;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+/* role name column header is left-aligned */
+.rbac-table thead th:first-child {
+    text-align: left;
+}
+
+/* body rows */
+.rbac-table tbody td {
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    text-align: center;
+    vertical-align: middle;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* role name cell — left-aligned, slightly brighter */
+.rbac-table tbody td:first-child {
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.rbac-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.rbac-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* green tick for allowed modules */
+.perm-yes {
+    color: var(--color-success);
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+/* dash for modules not in this role's scope */
+.perm-no {
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+/* "View" label for read-only access (used by dispatcher for Fleet) */
+.perm-view {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-info);
+}
+
+
+/* ---- Responsive — stack panels on narrow screens ---- */
+
+@media (max-width: 900px) {
+    .settings-layout {
+        grid-template-columns: 1fr;
+    }
+}

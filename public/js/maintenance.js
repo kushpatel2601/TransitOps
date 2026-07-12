@@ -36,13 +36,39 @@ let serviceRecords = [];
 // Initialisation — runs after the DOM is ready
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await refreshUserFromServer();
     loadUserInfo();
     loadVehicles();
     loadServiceLog();
     setupFormEvents();
     setupSidebarToggle();
 });
+
+
+async function refreshUserFromServer() {
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('transitops_token');
+            localStorage.removeItem('transitops_user');
+            window.location.href = '/';
+            return;
+        }
+        const result = await res.json();
+        if (result.success && result.user) {
+            localStorage.setItem('transitops_user', JSON.stringify({
+                id:          result.user.id,
+                fullName:    result.user.fullName,
+                email:       result.user.email,
+                role:        result.user.role,
+                permissions: result.user.permissions
+            }));
+        }
+    } catch (_) { /* network error — proceed with cached data */ }
+}
 
 
 // ============================================================

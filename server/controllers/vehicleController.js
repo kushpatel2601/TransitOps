@@ -156,12 +156,12 @@ async function createVehicle(req, res) {
             });
         }
 
-        // insert the new vehicle
+        // insert the new vehicle — acquisition_cost is required for ROI analytics
         const result = await db.query(`
-            INSERT INTO vehicles 
+            INSERT INTO vehicles
                 (registration_no, vehicle_type, make, model, year,
-                 capacity, status, current_mileage, fuel_type)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                 capacity, status, current_mileage, fuel_type, acquisition_cost)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING *
         `, [
             registration_no.toUpperCase(),
@@ -172,7 +172,8 @@ async function createVehicle(req, res) {
             capacity || 0,
             status || 'available',
             current_mileage || 0,
-            fuel_type || 'diesel'
+            fuel_type || 'diesel',
+            req.body.acquisition_cost || 0
         ]);
 
         res.status(201).json({
@@ -209,7 +210,8 @@ async function updateVehicle(req, res) {
             capacity,
             status,
             current_mileage,
-            fuel_type
+            fuel_type,
+            acquisition_cost
         } = req.body;
 
         // make sure the vehicle exists first
@@ -244,17 +246,18 @@ async function updateVehicle(req, res) {
         const current = existing.rows[0];
         const result = await db.query(`
             UPDATE vehicles SET
-                registration_no = $1,
-                vehicle_type    = $2,
-                make            = $3,
-                model           = $4,
-                year            = $5,
-                capacity        = $6,
-                status          = $7,
-                current_mileage = $8,
-                fuel_type       = $9,
-                updated_at      = NOW()
-            WHERE id = $10
+                registration_no  = $1,
+                vehicle_type     = $2,
+                make             = $3,
+                model            = $4,
+                year             = $5,
+                capacity         = $6,
+                status           = $7,
+                current_mileage  = $8,
+                fuel_type        = $9,
+                acquisition_cost = $10,
+                updated_at       = NOW()
+            WHERE id = $11
             RETURNING *
         `, [
             (registration_no || current.registration_no).toUpperCase(),
@@ -266,6 +269,7 @@ async function updateVehicle(req, res) {
             status || current.status,
             current_mileage !== undefined ? current_mileage : current.current_mileage,
             fuel_type || current.fuel_type,
+            acquisition_cost !== undefined ? acquisition_cost : current.acquisition_cost,
             id
         ]);
 

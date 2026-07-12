@@ -1,0 +1,264 @@
+/*
+ * analytics.css
+ * -------------------------------------------
+ * Styles for the Reports & Analytics page.
+ *
+ * Covers:
+ *  - 4 KPI tiles grid (matching wireframe colours)
+ *  - Breadcrumb / cost label row
+ *  - Monthly revenue bar chart container
+ *  - Bar chart bars, hover tooltips, x-axis labels
+ *  - Top 5 costliest vehicles horizontal bars
+ *  - Responsive stacking for small screens
+ * -------------------------------------------
+ */
+
+
+/* ---- Page header: title + Export CSV button side by side ---- */
+
+.analytics-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+}
+
+.analytics-page-header .page-title {
+    margin: 0;
+}
+
+/* Export CSV button — subtle, compact, matches the overall dark theme */
+.btn-export-csv {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-success, #27ae60);
+    background: transparent;
+    border: 1px solid var(--color-success, #27ae60);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+}
+
+.btn-export-csv:hover {
+    background: var(--color-success, #27ae60);
+    color: #fff;
+}
+
+
+/* ---- 5 KPI tiles across the top ---- */
+
+.analytics-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+/* base card style — matches the dark card look from the wireframe */
+.analytics-kpi-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    transition: border-color var(--transition-fast);
+}
+
+.analytics-kpi-card:hover {
+    border-color: var(--color-primary);
+}
+
+/* small uppercase label above the number */
+.akpi-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-sm);
+}
+
+/* the big number / value */
+.akpi-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+/* Fleet Utilization tile gets a blue accent — matches wireframe */
+.akpi-accent-blue .akpi-value {
+    color: var(--color-info);
+}
+
+/* Operational Cost tile gets an orange accent — matches wireframe */
+.akpi-accent-orange .akpi-value {
+    color: var(--color-warning);
+}
+
+/* Vehicle ROI tile gets a green accent */
+.akpi-accent-green .akpi-value {
+    color: var(--color-success, #27ae60);
+}
+
+
+/* ---- Breadcrumb / cost path hint ---- */
+
+.analytics-breadcrumb {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+    letter-spacing: 0.02em;
+}
+
+
+/* ---- Bottom two-column: chart + top vehicles ---- */
+
+.analytics-bottom {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: var(--space-xl);
+}
+
+
+/* ---- Monthly revenue bar chart panel ---- */
+
+.analytics-chart-panel {
+    min-height: 220px;
+}
+
+/* the scrollable container that holds the SVG chart */
+.bar-chart-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: var(--space-sm);
+}
+
+/* the SVG drawn by analytics.js fills the full width */
+.bar-chart-wrap svg {
+    display: block;
+}
+
+/* x-axis month labels sit below the SVG */
+.bar-chart-labels {
+    display: flex;
+    gap: 0;
+    margin-top: var(--space-xs);
+    padding: 0 4px; /* slight indent to align with bar edges */
+}
+
+.bar-label-item {
+    flex: 1;
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+
+/* ---- Top 5 costliest vehicles ---- */
+
+.analytics-vehicles-panel {
+    min-height: 220px;
+}
+
+/* list wrapper — one row per vehicle */
+.top-vehicles-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-top: var(--space-sm);
+}
+
+/* a single vehicle row: name on the left, bar on the right */
+.vehicle-cost-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+/* vehicle name / label */
+.vehicle-cost-name {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 65px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* the grey track the coloured bar sits inside */
+.vehicle-cost-track {
+    flex: 1;
+    height: 16px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+/* the filled bar — width is set inline by JS as a percentage */
+.vehicle-cost-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    transition: width 0.6s ease;
+    min-width: 4px; /* always visible even when cost is very small */
+}
+
+/*
+ * Each of the top 5 gets a distinct colour matching the wireframe:
+ * 1 → red (highest cost)  2 → orange  3 → blue  4 → teal  5 → purple
+ */
+.vehicle-cost-fill.rank-1 { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+.vehicle-cost-fill.rank-2 { background: linear-gradient(90deg, #e67e22, #d35400); }
+.vehicle-cost-fill.rank-3 { background: linear-gradient(90deg, #3498db, #2980b9); }
+.vehicle-cost-fill.rank-4 { background: linear-gradient(90deg, #1abc9c, #16a085); }
+.vehicle-cost-fill.rank-5 { background: linear-gradient(90deg, #9b59b6, #8e44ad); }
+
+/* cost figure shown to the right of the bar */
+.vehicle-cost-amount {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    min-width: 48px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+
+/* ---- Responsive ---- */
+
+@media (max-width: 1200px) {
+    .analytics-kpi-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1100px) {
+    .analytics-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .analytics-bottom {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .analytics-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+    }
+
+    .analytics-kpi-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-sm);
+    }
+
+    .akpi-value {
+        font-size: 1.4rem;
+    }
+}

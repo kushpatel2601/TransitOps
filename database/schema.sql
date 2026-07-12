@@ -31,10 +31,10 @@ CREATE TABLE roles (
 
 -- Seed the four core roles from the design spec
 INSERT INTO roles (name, description, permissions) VALUES
-    ('fleet_manager', 'Fleet Manager — Fleet, Maintenance', 
-        '{"dashboard": true, "vehicles": true, "drivers": true, "trips": true, "maintenance": true, "fuel_expenses": false, "reports": true, "settings": true}'),
-    ('dispatcher', 'Dispatcher — Dashboard, Trips', 
-        '{"dashboard": true, "vehicles": false, "drivers": false, "trips": true, "maintenance": false, "fuel_expenses": false, "reports": false, "settings": false}'),
+    ('fleet_manager', 'Fleet Manager — Fleet, Maintenance, Budget',
+        '{"dashboard": true, "vehicles": true, "drivers": true, "trips": true, "maintenance": true, "fuel_expenses": true, "reports": true, "settings": true}'),
+    ('dispatcher', 'Dispatcher — Dashboard, Trips, Expenses',
+        '{"dashboard": true, "vehicles": false, "drivers": false, "trips": true, "maintenance": false, "fuel_expenses": true, "reports": false, "settings": false}'),
     ('safety_officer', 'Safety Officer — Drivers, Compliance', 
         '{"dashboard": true, "vehicles": false, "drivers": true, "trips": false, "maintenance": true, "fuel_expenses": false, "reports": true, "settings": false}'),
     ('financial_analyst', 'Financial Analyst — Fuel & Expenses, Analytics', 
@@ -72,10 +72,11 @@ CREATE TABLE vehicles (
     make                VARCHAR(50),
     model               VARCHAR(50),
     year                INTEGER,
-    capacity            INTEGER DEFAULT 0,     -- passenger seats
-    status              VARCHAR(20) DEFAULT 'active',  -- active | inactive | maintenance
+    capacity            INTEGER DEFAULT 0,     -- passenger seats or cargo tonnes
+    status              VARCHAR(20) DEFAULT 'available',  -- available | on_trip | maintenance | inactive
     current_mileage     DECIMAL(10, 2) DEFAULT 0,
     fuel_type           VARCHAR(20) DEFAULT 'diesel',
+    acquisition_cost    DECIMAL(12, 2) DEFAULT 0,   -- purchase price; used for ROI calculation
     last_service_date   DATE,
     insurance_expiry    DATE,
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -93,7 +94,7 @@ CREATE TABLE drivers (
     license_expiry  DATE,
     phone           VARCHAR(20),
     email           VARCHAR(150),
-    status              VARCHAR(20) DEFAULT 'active',  -- active | on_leave | suspended
+    status              VARCHAR(20) DEFAULT 'active',  -- active | on_trip | on_leave | suspended
     safety_score        DECIMAL(4, 2) DEFAULT 100.00,  -- out of 100
     license_category    VARCHAR(20) DEFAULT 'LMV',
     trip_completion_rate DECIMAL(5, 2) DEFAULT 100.00,
@@ -132,8 +133,10 @@ CREATE TABLE trips (
     arrival_time    TIMESTAMP,
     actual_departure TIMESTAMP,
     actual_arrival  TIMESTAMP,
-    status          VARCHAR(20) DEFAULT 'scheduled',  -- scheduled | in_progress | completed | cancelled | delayed
-    passenger_count INTEGER DEFAULT 0,
+    status          VARCHAR(20) DEFAULT 'draft',       -- draft | dispatched | completed | cancelled
+    distance_km     DECIMAL(8, 2),                     -- planned trip distance (km); persisted from dispatch form
+    cargo_weight_kg DECIMAL(10, 2) DEFAULT 0,          -- renamed from passenger_count for clarity
+    passenger_count INTEGER DEFAULT 0,                 -- kept for backward-compat; use cargo_weight_kg for freight
     notes           TEXT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP

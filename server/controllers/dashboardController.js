@@ -84,29 +84,32 @@ async function getDashboardStats(req, res) {
  */
 async function getVehicleCounts() {
     const result = await db.query(`
-        SELECT 
+        SELECT
             COUNT(*) FILTER (WHERE status != 'inactive')    AS active,
             COUNT(*) FILTER (WHERE status = 'available')    AS available,
+            COUNT(*) FILTER (WHERE status = 'on_trip')      AS on_trip,
             COUNT(*) FILTER (WHERE status = 'maintenance')  AS maintenance
         FROM vehicles
     `);
 
     const row = result.rows[0];
     return {
-        active: parseInt(row.active) || 0,
-        available: parseInt(row.available) || 0,
+        active:      parseInt(row.active)      || 0,
+        available:   parseInt(row.available)   || 0,
+        on_trip:     parseInt(row.on_trip)      || 0,
         maintenance: parseInt(row.maintenance) || 0
     };
 }
 
 /**
- * Count trips — active ones (in_progress) and pending (scheduled)
+ * Count trips — dispatched ones (live) and any still in draft
+ * Spec lifecycle: draft | dispatched | completed | cancelled
  */
 async function getTripCounts() {
     const result = await db.query(`
-        SELECT 
-            COUNT(*) FILTER (WHERE status = 'in_progress')  AS active,
-            COUNT(*) FILTER (WHERE status = 'scheduled')    AS pending
+        SELECT
+            COUNT(*) FILTER (WHERE status = 'dispatched') AS active,
+            COUNT(*) FILTER (WHERE status = 'draft')      AS pending
         FROM trips
     `);
 
@@ -118,14 +121,15 @@ async function getTripCounts() {
 }
 
 /**
- * Count drivers who are currently on an active trip
- * (their driver_id shows up in an in_progress trip)
+ * Count drivers currently on a live trip.
+ * We read directly from the drivers table (status = 'on_trip')
+ * which is kept in sync by createTrip / updateTrip.
  */
 async function getDriversOnDuty() {
     const result = await db.query(`
-        SELECT COUNT(DISTINCT driver_id) AS count
-        FROM trips
-        WHERE status = 'in_progress' AND driver_id IS NOT NULL
+        SELECT COUNT(*) AS count
+        FROM drivers
+        WHERE status = 'on_trip'
     `);
 
     return parseInt(result.rows[0].count) || 0;

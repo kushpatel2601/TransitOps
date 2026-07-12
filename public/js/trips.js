@@ -32,7 +32,8 @@ let tripsList = [];
 
 
 // ---- Initialization ----
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await refreshUserFromServer();
     loadUserInfo();
     loadDropdowns();
     loadLiveBoard();
@@ -40,6 +41,31 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSidebarToggle();
     setupLogout();
 });
+
+
+async function refreshUserFromServer() {
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('transitops_token');
+            localStorage.removeItem('transitops_user');
+            window.location.href = '/';
+            return;
+        }
+        const result = await res.json();
+        if (result.success && result.user) {
+            localStorage.setItem('transitops_user', JSON.stringify({
+                id:          result.user.id,
+                fullName:    result.user.fullName,
+                email:       result.user.email,
+                role:        result.user.role,
+                permissions: result.user.permissions
+            }));
+        }
+    } catch (_) { /* network error — proceed with cached data */ }
+}
 
 
 /**
@@ -253,21 +279,22 @@ function setupFormEvents() {
  * Post a new trip assignment to database.
  */
 async function submitTrip() {
-    const source = document.getElementById('source').value.trim();
+    const source      = document.getElementById('source').value.trim();
     const destination = document.getElementById('destination').value.trim();
-    const vehicle_id = document.getElementById('vehicleSelect').value;
-    const driver_id = document.getElementById('driverSelect').value;
+    const vehicle_id  = document.getElementById('vehicleSelect').value;
+    const driver_id   = document.getElementById('driverSelect').value;
     const cargo_weight = document.getElementById('cargoWeight').value;
-    const planned_departure_min = document.getElementById('distance').value || 0; // mapping planned distance/ETA min
+    // distance_km is saved on the route record (P1 fix — spec §3.5 planned distance)
+    const distance_km  = document.getElementById('distance').value || null;
 
     const data = {
         source,
         destination,
-        vehicle_id: parseInt(vehicle_id),
-        driver_id: parseInt(driver_id),
+        vehicle_id:  parseInt(vehicle_id),
+        driver_id:   parseInt(driver_id),
         cargo_weight: parseFloat(cargo_weight),
-        planned_departure_min: parseInt(planned_departure_min),
-        status: 'in_progress' // Dispatch maps to immediately active/in_progress
+        distance_km:  distance_km ? parseFloat(distance_km) : null
+        // status is always 'dispatched' — set by the backend (spec §3.5 lifecycle)
     };
 
     try {
@@ -283,20 +310,31 @@ async function submitTrip() {
         const result = await res.json();
 
         if (result.success) {
-            // Reset form and reload
+            // Reset form fields and hide the validation card
             document.getElementById('dispatchForm').reset();
             document.getElementById('validationCard').classList.add('hidden');
-            
-            // Reload dropdowns and live board list
+
+            // Reload the available dropdowns (vehicle + driver just became On Trip)
+            // and refresh the live board so the new card appears immediately
             await loadDropdowns();
             await loadLiveBoard();
         } else {
-            alert(result.message || 'Failed to dispatch trip.');
+            // Show inline error — no alert() per project rules
+            const errBanner = document.getElementById('dispatchErrorBanner');
+            if (errBanner) {
+                errBanner.textContent = result.message || 'Failed to dispatch trip.';
+                errBanner.classList.remove('hidden');
+                setTimeout(() => errBanner.classList.add('hidden'), 5000);
+            }
         }
 
     } catch (err) {
         console.error('Failed to submit trip:', err);
-        alert('Network error. Failed to dispatch trip assignment.');
+        const errBanner = document.getElementById('dispatchErrorBanner');
+        if (errBanner) {
+            errBanner.textContent = 'Network error — could not dispatch trip.';
+            errBanner.classList.remove('hidden');
+        }
     }
 }
 
@@ -354,24 +392,24 @@ function renderLiveBoard(trips) {
         const vehicleInfo = trip.vehicle_model ? `${trip.vehicle_model} (${trip.vehicle_reg})` : 'Unassigned vehicle';
         const driverInfo = trip.driver_name || 'Unassigned driver';
 
-        // dynamic statuses badges classes
+        // dynamic status badge
         const statusBadge = getTripStatusBadge(trip.status);
 
-        // ETA calculation
+        // ETA / state text
         let etaText = '—';
-        if (trip.status === 'in_progress') {
+        if (trip.status === 'dispatched') {
             etaText = calculateTripETA(trip);
         } else if (trip.status === 'completed') {
             etaText = 'Arrived';
         } else if (trip.status === 'draft') {
-            etaText = 'Awaiting vehicle';
+            etaText = 'Awaiting dispatch';
         } else if (trip.status === 'cancelled') {
-            etaText = 'Vehicle went to shop';
+            etaText = 'Cancelled';
         }
 
-        // Action controls for active trips
+        // Action controls — only live dispatched trips can be completed or cancelled
         let actionButtons = '';
-        if (trip.status === 'in_progress' || trip.status === 'scheduled') {
+        if (trip.status === 'dispatched') {
             actionButtons = `
                 <div class="trip-actions">
                     <button class="btn-action-small complete" onclick="updateTripStatus(${trip.id}, 'completed')">Complete</button>
@@ -408,8 +446,6 @@ function getTripStatusBadge(status) {
     switch (status) {
         case 'draft':
             return '<span class="status-badge draft">Draft</span>';
-        case 'in_progress':
-        case 'scheduled':
         case 'dispatched':
             return '<span class="status-badge dispatched">Dispatched</span>';
         case 'completed':
@@ -451,16 +487,20 @@ window.updateTripStatus = async function(id, newStatus) {
         const result = await res.json();
 
         if (result.success) {
-            // refresh data
+            // Refresh available dropdowns (vehicle/driver freed) and live board
             await loadDropdowns();
             await loadLiveBoard();
         } else {
-            alert(result.message || 'Failed to update trip status.');
+            const errBanner = document.getElementById('dispatchErrorBanner');
+            if (errBanner) {
+                errBanner.textContent = result.message || 'Failed to update trip status.';
+                errBanner.classList.remove('hidden');
+                setTimeout(() => errBanner.classList.add('hidden'), 5000);
+            }
         }
 
     } catch (err) {
         console.error('Failed to update trip status:', err);
-        alert('Network error updating trip status.');
     }
 };
 

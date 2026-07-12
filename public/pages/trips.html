@@ -55,13 +55,13 @@
                             <h2 class="panel-title">CREATE TRIP</h2>
                         </div>
 
-                        <!-- Trip Lifecycle Indicator -->
+                        <!-- Trip Lifecycle Indicator — spec §3.5: Draft → Dispatched → Completed / Cancelled -->
                         <div class="lifecycle-indicator">
                             <div class="step-item active" data-status="draft">
                                 <span class="step-dot"></span>
                                 <span class="step-label">Draft</span>
                             </div>
-                            <div class="step-item" data-status="in_progress">
+                            <div class="step-item" data-status="dispatched">
                                 <span class="step-dot"></span>
                                 <span class="step-label">Dispatched</span>
                             </div>
@@ -74,6 +74,9 @@
                                 <span class="step-label">Cancelled</span>
                             </div>
                         </div>
+
+                        <!-- Inline error banner — shown instead of alert() on dispatch failure -->
+                        <div class="field-error hidden" id="dispatchErrorBanner" role="alert" style="margin-bottom:var(--space-sm);padding:8px 12px;border-radius:var(--radius-sm);background:rgba(231,76,60,0.12);color:#e74c3c;font-size:var(--font-size-xs);"></div>
 
                         <form id="dispatchForm" class="dispatch-form">
                             <div class="form-group">

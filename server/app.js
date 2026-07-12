@@ -52,9 +52,11 @@ app.use('/api/fuel', require('./routes/fuelRoutes'));
 // expense tracking (tolls, fines, etc.)
 app.use('/api/expenses', require('./routes/expenseRoutes'));
 
-// TODO: add remaining route modules as we build them
-// app.use('/api/reports', require('./routes/reportRoutes'));
-// app.use('/api/settings', require('./routes/settingsRoutes'));
+// reports & analytics
+app.use('/api/reports',  require('./routes/reportRoutes'));
+
+// depot settings and RBAC matrix
+app.use('/api/settings', require('./routes/settingsRoutes'));
 
 
 // ---- Page Routes ----
@@ -87,6 +89,14 @@ app.get('/maintenance', (req, res) => {
 
 app.get('/fuel-expenses', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'fuel-expenses.html'));
+});
+
+app.get('/analytics', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'analytics.html'));
+});
+
+app.get('/settings', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'settings.html'));
 });
 
 // catch-all: redirect unknown routes to login

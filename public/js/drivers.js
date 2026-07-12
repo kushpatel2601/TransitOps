@@ -35,12 +35,39 @@ let editingDriverId = null;
 
 
 // ---- Page Initialization ----
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await refreshUserFromServer();
     loadUserInfo();
     loadPageData();
     setupEvents();
     setupSidebarToggle();
 });
+
+
+async function refreshUserFromServer() {
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('transitops_token');
+            localStorage.removeItem('transitops_user');
+            window.location.href = '/';
+            return;
+        }
+        const result = await res.json();
+        if (result.success && result.user) {
+            localStorage.setItem('transitops_user', JSON.stringify({
+                id:          result.user.id,
+                fullName:    result.user.fullName,
+                email:       result.user.email,
+                role:        result.user.role,
+                permissions: result.user.permissions
+            }));
+        }
+    } catch (_) { /* network error — proceed with cached data */ }
+}
+
 
 
 /**
@@ -199,12 +226,15 @@ function renderDriverTable(drivers) {
  */
 function getComputedDriverStatus(driver) {
     if (driver.status === 'suspended') return 'suspended';
-    if (driver.status === 'on_leave') return 'on_leave';
+    if (driver.status === 'on_leave')  return 'on_leave';
+    // If the DB already marks this driver as on_trip, trust it — createTrip() sets it
+    if (driver.status === 'on_trip')   return 'on_trip';
 
-    // check if driver is currently assigned to an active trip
-    const activeTrip = tripsList.find(t => 
-        t.driver_id === driver.id && 
-        (t.status === 'in_progress' || t.status === 'dispatched')
+    // Secondary check: scan the live board for a dispatched trip with this driver
+    // (defensive fallback in case the DB status lags a render cycle)
+    const activeTrip = tripsList.find(t =>
+        t.driver_id === driver.id &&
+        t.status === 'dispatched'
     );
 
     return activeTrip ? 'on_trip' : 'active';
