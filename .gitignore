@@ -15,3 +15,6 @@ Thumbs.db
 # logs
 *.log
 npm-debug.log*
+
+# local developer docs
+README_local.md
