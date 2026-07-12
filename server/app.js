@@ -31,6 +31,9 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // authentication (login, register, etc.)
 app.use('/api/auth', require('./routes/authRoutes'));
 
+// dashboard stats and KPI data
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+
 // TODO: add remaining route modules as we build them
 // app.use('/api/vehicles', require('./routes/vehicleRoutes'));
 // app.use('/api/drivers', require('./routes/driverRoutes'));

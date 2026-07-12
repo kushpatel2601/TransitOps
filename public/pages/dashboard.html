@@ -13,31 +13,33 @@
     <!-- ======================================================
          Dashboard — Main application shell
          
-         This page loads after successful authentication.
+         Layout: sidebar on the left, main content on the right.
          The sidebar provides navigation to all 8 modules.
+         KPI cards, recent trips table, and vehicle status
+         chart are loaded dynamically via the API.
     ====================================================== -->
+
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="app-layout">
         
-        <!-- ---- Sidebar ---- -->
+        <!-- ---- Sidebar Navigation ---- -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <h1>TransitOps</h1>
-                <span>Operations Hub</span>
             </div>
 
             <nav class="sidebar-nav" id="sidebarNav">
                 <a href="/dashboard" class="nav-link active" data-module="dashboard">
                     <span class="nav-icon">📊</span> Dashboard
                 </a>
-                <a href="/vehicles" class="nav-link" data-module="vehicles">
-                    <span class="nav-icon">🚍</span> Vehicles
+                <a href="/fleet" class="nav-link" data-module="vehicles">
+                    <span class="nav-icon">🚍</span> Fleet
                 </a>
                 <a href="/drivers" class="nav-link" data-module="drivers">
-                    <span class="nav-icon">👤</span> Drivers & Safety
+                    <span class="nav-icon">👤</span> Drivers
                 </a>
                 <a href="/trips" class="nav-link" data-module="trips">
-                    <span class="nav-icon">🗺️</span> Trip Dispatching
+                    <span class="nav-icon">🗺️</span> Trips
                 </a>
                 <a href="/maintenance" class="nav-link" data-module="maintenance">
                     <span class="nav-icon">🔧</span> Maintenance
@@ -45,11 +47,11 @@
                 <a href="/fuel-expenses" class="nav-link" data-module="fuel_expenses">
                     <span class="nav-icon">⛽</span> Fuel & Expenses
                 </a>
-                <a href="/reports" class="nav-link" data-module="reports">
-                    <span class="nav-icon">📈</span> Reports
+                <a href="/analytics" class="nav-link" data-module="reports">
+                    <span class="nav-icon">📈</span> Analytics
                 </a>
                 <a href="/settings" class="nav-link" data-module="settings">
-                    <span class="nav-icon">⚙️</span> Settings & RBAC
+                    <span class="nav-icon">⚙️</span> Settings
                 </a>
             </nav>
 
@@ -58,130 +60,126 @@
             </div>
         </aside>
 
-        <!-- ---- Main Content ---- -->
+        <!-- ---- Main Content Area ---- -->
         <div class="main-content">
             
-            <!-- Top bar -->
+            <!-- Top bar with search, user info, and role badge -->
             <header class="topbar">
                 <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Navigation Menu">☰</button>
-                <div class="topbar-title">Dashboard</div>
+                
+                <!-- search bar -->
+                <div class="topbar-search">
+                    <input type="text" class="search-input" id="globalSearch" placeholder="Search..." aria-label="Search">
+                </div>
+
                 <div class="topbar-actions">
                     <div class="user-info">
-                        <div class="user-avatar" id="userAvatar">R</div>
-                        <div>
-                            <div class="user-name" id="userName">User</div>
-                            <div class="user-role" id="userRole">—</div>
-                        </div>
+                        <span class="user-name" id="userName">User</span>
                     </div>
-                    <button class="btn-logout" id="logoutBtn">Logout</button>
+                    <div class="role-badge" id="roleBadge">—</div>
                 </div>
             </header>
 
-            <!-- Page content -->
+            <!-- Dashboard page content -->
             <div class="page-content">
-                <div class="welcome-banner">
-                    <h2 id="welcomeMessage">Welcome back! 👋</h2>
-                    <p>Here's what's happening with your fleet today.</p>
+
+                <!-- Filters row — vehicle type, status, region -->
+                <div class="filters-row" id="filtersRow">
+                    <span class="filters-label">FILTERS</span>
+                    <select class="filter-select" id="filterVehicleType">
+                        <option value="">Vehicle Type: All</option>
+                        <option value="bus">Bus</option>
+                        <option value="van">Van</option>
+                        <option value="minibus">Minibus</option>
+                        <option value="truck">Truck</option>
+                    </select>
+                    <select class="filter-select" id="filterStatus">
+                        <option value="">Status: All</option>
+                        <option value="active">Active</option>
+                        <option value="available">Available</option>
+                        <option value="maintenance">In Maintenance</option>
+                        <option value="retired">Retired</option>
+                    </select>
+                    <select class="filter-select" id="filterRegion">
+                        <option value="">Region: All</option>
+                        <option value="north">North</option>
+                        <option value="south">South</option>
+                        <option value="east">East</option>
+                        <option value="west">West</option>
+                    </select>
                 </div>
 
-                <div class="dev-notice">
-                    ℹ️ Dashboard module is being built. Full KPI cards, trip tables, and live status updates coming soon.
+                <!-- KPI Cards — the seven metric boxes shown at the top -->
+                <div class="kpi-grid" id="kpiGrid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">ACTIVE VEHICLES</div>
+                        <div class="kpi-value" id="kpiActiveVehicles">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">AVAILABLE VEHICLES</div>
+                        <div class="kpi-value" id="kpiAvailableVehicles">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">VEHICLES IN MAINTENANCE</div>
+                        <div class="kpi-value kpi-warning" id="kpiInMaintenance">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">ACTIVE TRIPS</div>
+                        <div class="kpi-value" id="kpiActiveTrips">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">PENDING TRIPS</div>
+                        <div class="kpi-value" id="kpiPendingTrips">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">DRIVERS ON DUTY</div>
+                        <div class="kpi-value" id="kpiDriversOnDuty">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">FLEET UTILIZATION</div>
+                        <div class="kpi-value kpi-highlight" id="kpiUtilization">—</div>
+                    </div>
+                </div>
+
+                <!-- Bottom section: recent trips table + vehicle status chart -->
+                <div class="dashboard-bottom">
+                    
+                    <!-- Recent Trips table -->
+                    <div class="panel recent-trips-panel">
+                        <h3 class="panel-title">RECENT TRIPS</h3>
+                        <table class="data-table" id="recentTripsTable">
+                            <thead>
+                                <tr>
+                                    <th>TRIP</th>
+                                    <th>VEHICLE</th>
+                                    <th>DRIVER</th>
+                                    <th>STATUS</th>
+                                    <th>ETA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentTripsBody">
+                                <!-- rows populated by JavaScript -->
+                                <tr>
+                                    <td colspan="5" class="loading-text">Loading trips...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Vehicle Status horizontal bar chart -->
+                    <div class="panel vehicle-status-panel">
+                        <h3 class="panel-title">VEHICLE STATUS</h3>
+                        <div class="status-bars" id="vehicleStatusBars">
+                            <!-- bars populated by JavaScript -->
+                            <div class="loading-text">Loading status...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        /**
-         * Dashboard page bootstrap script
-         * 
-         * Checks authentication, loads user info into the UI,
-         * and handles logout. The full dashboard logic will be
-         * split into its own file once we build that module out.
-         */
-
-        // check if user is logged in
-        const token = localStorage.getItem('transitops_token');
-        const userData = localStorage.getItem('transitops_user');
-
-        if (!token || !userData) {
-            // not logged in — redirect to login page
-            window.location.href = '/';
-        }
-
-        // parse the stored user data and populate the UI
-        try {
-            const user = JSON.parse(userData);
-            
-            // set user name in the top bar
-            document.getElementById('userName').textContent = user.fullName || 'User';
-            
-            // format the role name nicely (e.g. "fleet_manager" → "Fleet Manager")
-            const roleDisplay = (user.role || '')
-                .split('_')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ');
-            document.getElementById('userRole').textContent = roleDisplay;
-            
-            // avatar shows first letter of name
-            const initials = (user.fullName || 'U').charAt(0).toUpperCase();
-            document.getElementById('userAvatar').textContent = initials;
-            
-            // personalized welcome
-            document.getElementById('welcomeMessage').textContent = 
-                `Welcome back, ${user.fullName?.split(' ')[0] || 'User'}! 👋`;
-
-            // hide sidebar links the user doesn't have permission to access
-            if (user.permissions) {
-                const navLinks = document.querySelectorAll('.nav-link[data-module]');
-                navLinks.forEach(link => {
-                    const module = link.getAttribute('data-module');
-                    // dashboard is always visible
-                    if (module !== 'dashboard' && user.permissions[module] === false) {
-                        link.style.opacity = '0.3';
-                        link.style.pointerEvents = 'none';
-                        link.title = 'You do not have access to this module';
-                    }
-                });
-            }
-
-        } catch (err) {
-            console.error('Error loading user data:', err);
-        }
-
-        // handle logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('transitops_token');
-            localStorage.removeItem('transitops_user');
-            window.location.href = '/';
-        });
-
-        // ---- Mobile Sidebar Navigation Toggle ----
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const menuToggleBtn = document.getElementById('menuToggleBtn');
-
-        if (menuToggleBtn && sidebar && sidebarOverlay) {
-            menuToggleBtn.addEventListener('click', () => {
-                sidebar.classList.add('open');
-                sidebarOverlay.classList.add('visible');
-            });
-
-            // Close sidebar when clicking overlay
-            sidebarOverlay.addEventListener('click', () => {
-                sidebar.classList.remove('open');
-                sidebarOverlay.classList.remove('visible');
-            });
-
-            // Close sidebar when clicking any navigation link (useful for SPA behavior later)
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    sidebar.classList.remove('open');
-                    sidebarOverlay.classList.remove('visible');
-                });
-            });
-        }
-    </script>
+    <!-- dashboard logic — loads data from API and renders it -->
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>
