@@ -6,14 +6,13 @@
 
 **Fleet · Drivers · Trips · Maintenance · Fuel & Expenses · Analytics — unified under one role-based control center**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-transit--ops--xi.vercel.app-3b82d4?style=for-the-badge&logo=vercel)](https://transit-ops-xi.vercel.app/)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=flat-square&logo=node.js&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Self--Hosted-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![JWT](https://img.shields.io/badge/Auth-JWT%20%2B%20bcrypt-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
 ![No Framework](https://img.shields.io/badge/Frontend-Vanilla%20JS-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square)
 
-**[🔗 Live Demo](https://transit-ops-xi.vercel.app/)** · [Features](#-key-features) · [Tech Stack](#️-tech-stack) · [Architecture](#-architecture) · [Getting Started](#-local-setup) · [RBAC](#-roles--access-rbac) · [API](#-api-endpoints)
+ · [Features](#-key-features) · [Tech Stack](#️-tech-stack) · [Architecture](#-architecture) · [Getting Started](#-local-setup) · [RBAC](#-roles--access-rbac) · [API](#-api-endpoints)
 
 </div>
 
