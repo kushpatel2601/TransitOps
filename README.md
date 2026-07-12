@@ -1,29 +1,7 @@
 <div align="center">
 
-#   <div class="logo">
-  <div class="sq" style="background:#e8a33d"></div>
-  <div class="sq" style="background:#f6dfa3"></div>
-  <div class="sq" style="background:#f0c15c"></div>
-  <div class="sq" style="background:#f6dfa3"></div>
-</div>
-
-<style>
-  .logo {
-    width: 80px;
-    height: 80px;
-    background: #f0f0f0;
-    border-radius: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 8px;
-    padding: 12px;
-    box-sizing: border-box;
-  }
-  .sq {
-    border-radius: 8px;
-  }
-</style> TransitOps
+#  <img width="65" height="53" alt="Screenshot 2026-07-12 165549" src="https://github.com/user-attachments/assets/48f2635e-af37-4008-9a12-a8df16db11de" />
+TransitOps
 
 ### Smart Transport Operations Platform
 
