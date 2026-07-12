@@ -1,0 +1,330 @@
+/* ==========================================================
+ * auth.css — Styles specific to the login/register page
+ *
+ * Layout: split panel — branding on left, form on right.
+ * Matches the TransitOps authentication wireframe.
+ * ========================================================== */
+
+/* ---- Page Layout ---- */
+.auth-page {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-body);
+}
+
+/* the main container that holds both panels */
+.auth-container {
+    display: flex;
+    width: 100vw;
+    min-height: 100vh;
+    border-radius: 0;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ---- Left Panel: Branding ---- */
+.auth-branding {
+    width: 40%;
+    background: linear-gradient(160deg, #e8e8ec 0%, #d5d5dc 100%);
+    padding: var(--space-2xl) var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+/* logo icon */
+.auth-logo {
+    width: 48px;
+    height: 48px;
+    background: repeating-conic-gradient(
+        var(--color-primary) 0% 25%, 
+        rgba(212, 160, 23, 0.4) 25% 50%
+    );
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.auth-branding h1 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.25rem;
+}
+
+.auth-branding .tagline {
+    font-size: var(--font-size-sm);
+    color: #555;
+    margin-bottom: var(--space-2xl);
+}
+
+/* role list on the left panel */
+.role-highlights {
+    margin-top: auto;
+    margin-bottom: var(--space-2xl);
+}
+
+.role-highlights h3 {
+    font-size: var(--font-size-base);
+    color: #333;
+    margin-bottom: var(--space-md);
+    font-weight: 500;
+}
+
+.role-highlights ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.role-highlights li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: var(--font-size-sm);
+    color: #444;
+    font-weight: 500;
+}
+
+/* the orange dot before each role */
+.role-highlights li::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background-color: var(--color-primary);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* footer copyright text */
+.auth-footer {
+    font-size: var(--font-size-xs);
+    color: #888;
+    padding-top: var(--space-lg);
+}
+
+
+/* ---- Right Panel: Login Form ---- */
+.auth-form-panel {
+    flex: 1;
+    background-color: var(--bg-surface);
+    padding: var(--space-2xl) var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.auth-form-wrapper {
+    max-width: 440px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-form-panel h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+}
+
+.auth-form-panel .subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-xl);
+}
+
+/* the login form itself */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* remember me + forgot password row */
+.auth-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-sm);
+}
+
+/* custom checkbox styling */
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-success);
+    cursor: pointer;
+}
+
+.forgot-link {
+    color: #5dade2;
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    transition: color var(--transition-fast);
+}
+
+.forgot-link:hover {
+    color: #85c1e9;
+    text-decoration: underline;
+}
+
+/* sign in button */
+.btn-signin {
+    padding: 0.85rem;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+/* subtle shine animation on the button */
+.btn-signin::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg, 
+        transparent, 
+        rgba(255,255,255,0.15), 
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.btn-signin:hover::after {
+    left: 100%;
+}
+
+/* loading state for the button */
+.btn-signin.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+
+/* ---- Role Scope Info ---- */
+.role-scope {
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border-color);
+}
+
+.role-scope p {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-bottom: var(--space-sm);
+    font-style: italic;
+}
+
+.role-scope ul {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.role-scope li {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+/* highlight the arrow in role scope */
+.role-scope li span {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+
+/* ---- Error Message Container ---- */
+.auth-error {
+    display: none;
+    padding: 0.85rem 1rem;
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-md);
+    align-items: flex-start;
+    gap: 0.5rem;
+    animation: shake 0.4s ease;
+}
+
+.auth-error.visible {
+    display: flex;
+}
+
+.auth-error .error-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+
+/* ---- Responsive Layout ---- */
+
+/* tablets — stack the panels */
+@media (max-width: 768px) {
+    .auth-container {
+        flex-direction: column;
+        width: 100%;
+        min-height: 100vh;
+    }
+
+    .auth-branding {
+        width: 100%;
+        padding: var(--space-xl) var(--space-lg);
+    }
+
+    /* hide the role list on small screens to save space */
+    .role-highlights {
+        display: none;
+    }
+
+    .auth-form-panel {
+        width: 100%;
+        padding: var(--space-xl) var(--space-lg);
+    }
+}
+
+/* small phones */
+@media (max-width: 480px) {
+    .auth-branding {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .auth-form-panel {
+        padding: var(--space-lg) var(--space-md);
+    }
+}

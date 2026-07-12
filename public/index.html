@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TransitOps — Smart Transport Operations Platform. Manage your fleet, drivers, and trips with role-based access control.">
+    <title>TransitOps — Sign In</title>
+    
+    <!-- stylesheets -->
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/auth.css">
+    
+    <!-- favicon (using an emoji as a quick placeholder) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚍</text></svg>">
+</head>
+<body>
+    <!-- ======================================================
+         Authentication Page — Login
+         
+         Split layout:
+           Left  → branding panel with role info
+           Right → login form with RBAC role selector
+    ====================================================== -->
+    <main class="auth-page" id="authPage">
+        <div class="auth-container">
+            
+            <!-- ---- Left: Branding Panel ---- -->
+            <div class="auth-branding">
+                <!-- logo (checkered amber square matching the wireframe) -->
+                <div>
+                    <div class="auth-logo" aria-hidden="true"></div>
+                    <h1>TransitOps</h1>
+                    <p class="tagline">Smart Transport Operations Platform</p>
+                </div>
+
+                <!-- role descriptions -->
+                <div class="role-highlights">
+                    <h3>One login, four roles:</h3>
+                    <ul>
+                        <li>Fleet Manager</li>
+                        <li>Dispatcher</li>
+                        <li>Safety Officer</li>
+                        <li>Financial Analyst</li>
+                    </ul>
+                </div>
+
+                <div class="auth-footer">
+                    TRANSITOPS &copy; 2026 &middot; RBAC Enabled
+                </div>
+            </div>
+
+            <!-- ---- Right: Login Form Panel ---- -->
+            <div class="auth-form-panel">
+                <div class="auth-form-wrapper">
+                    <h2>Sign in to your account</h2>
+                    <p class="subtitle">Enter your credentials to continue</p>
+
+                    <!-- error message (hidden by default, shown on failed login) -->
+                    <div class="auth-error" id="authError" role="alert">
+                        <span class="error-icon">✕</span>
+                        <span id="errorMessage">Invalid credentials.</span>
+                    </div>
+
+                    <form class="auth-form" id="loginForm" novalidate>
+                        
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="loginEmail" class="form-label">Email</label>
+                            <input 
+                                type="email" 
+                                id="loginEmail" 
+                                class="form-input" 
+                                placeholder="raven@transitops.in"
+                                autocomplete="email"
+                                required
+                            >
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group">
+                            <label for="loginPassword" class="form-label">Password</label>
+                            <input 
+                                type="password" 
+                                id="loginPassword" 
+                                class="form-input" 
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                                required
+                            >
+                        </div>
+
+                        <!-- Role selector -->
+                        <div class="form-group">
+                            <label for="loginRole" class="form-label">Role (RBAC)</label>
+                            <select id="loginRole" class="form-select" required>
+                                <option value="" disabled selected hidden>Select the role</option>
+                                <option value="fleet_manager">Fleet Manager</option>
+                                <option value="dispatcher">Dispatcher</option>
+                                <option value="safety_officer">Safety Officer</option>
+                                <option value="financial_analyst">Financial Analyst</option>
+                            </select>
+                        </div>
+
+                        <!-- Remember me + Forgot password -->
+                        <div class="auth-options">
+                            <label class="checkbox-wrapper" for="rememberMe">
+                                <input type="checkbox" id="rememberMe" checked>
+                                Remember me
+                            </label>
+                            <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot password?</a>
+                        </div>
+
+                        <!-- Sign In button -->
+                        <button type="submit" class="btn btn-primary btn-full btn-signin" id="signInBtn">
+                            Sign In
+                        </button>
+                    </form>
+
+                    <!-- Role scope descriptions -->
+                    <div class="role-scope">
+                        <p>Access is scoped by role after login:</p>
+                        <ul>
+                            <li>• Fleet Manager <span>→</span> Fleet, Maintenance</li>
+                            <li>• Dispatcher <span>→</span> Dashboard, Trips</li>
+                            <li>• Safety Officer <span>→</span> Drivers, Compliance</li>
+                            <li>• Financial Analyst <span>→</span> Fuel & Expenses, Analytics</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- login page script -->
+    <script src="js/auth.js"></script>
+</body>
+</html>

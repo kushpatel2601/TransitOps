@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TransitOps Dashboard — Real-time overview of fleet operations, trips, and performance metrics.">
+    <title>TransitOps — Dashboard</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚍</text></svg>">
+</head>
+<body>
+    <!-- ======================================================
+         Dashboard — Main application shell
+         
+         This page loads after successful authentication.
+         The sidebar provides navigation to all 8 modules.
+    ====================================================== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="app-layout">
+        
+        <!-- ---- Sidebar ---- -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <h1>TransitOps</h1>
+                <span>Operations Hub</span>
+            </div>
+
+            <nav class="sidebar-nav" id="sidebarNav">
+                <a href="/dashboard" class="nav-link active" data-module="dashboard">
+                    <span class="nav-icon">📊</span> Dashboard
+                </a>
+                <a href="/vehicles" class="nav-link" data-module="vehicles">
+                    <span class="nav-icon">🚍</span> Vehicles
+                </a>
+                <a href="/drivers" class="nav-link" data-module="drivers">
+                    <span class="nav-icon">👤</span> Drivers & Safety
+                </a>
+                <a href="/trips" class="nav-link" data-module="trips">
+                    <span class="nav-icon">🗺️</span> Trip Dispatching
+                </a>
+                <a href="/maintenance" class="nav-link" data-module="maintenance">
+                    <span class="nav-icon">🔧</span> Maintenance
+                </a>
+                <a href="/fuel-expenses" class="nav-link" data-module="fuel_expenses">
+                    <span class="nav-icon">⛽</span> Fuel & Expenses
+                </a>
+                <a href="/reports" class="nav-link" data-module="reports">
+                    <span class="nav-icon">📈</span> Reports
+                </a>
+                <a href="/settings" class="nav-link" data-module="settings">
+                    <span class="nav-icon">⚙️</span> Settings & RBAC
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="text-xs text-muted">v1.0.0 · Hackathon 2026</div>
+            </div>
+        </aside>
+
+        <!-- ---- Main Content ---- -->
+        <div class="main-content">
+            
+            <!-- Top bar -->
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Navigation Menu">☰</button>
+                <div class="topbar-title">Dashboard</div>
+                <div class="topbar-actions">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">R</div>
+                        <div>
+                            <div class="user-name" id="userName">User</div>
+                            <div class="user-role" id="userRole">—</div>
+                        </div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn">Logout</button>
+                </div>
+            </header>
+
+            <!-- Page content -->
+            <div class="page-content">
+                <div class="welcome-banner">
+                    <h2 id="welcomeMessage">Welcome back! 👋</h2>
+                    <p>Here's what's happening with your fleet today.</p>
+                </div>
+
+                <div class="dev-notice">
+                    ℹ️ Dashboard module is being built. Full KPI cards, trip tables, and live status updates coming soon.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Dashboard page bootstrap script
+         * 
+         * Checks authentication, loads user info into the UI,
+         * and handles logout. The full dashboard logic will be
+         * split into its own file once we build that module out.
+         */
+
+        // check if user is logged in
+        const token = localStorage.getItem('transitops_token');
+        const userData = localStorage.getItem('transitops_user');
+
+        if (!token || !userData) {
+            // not logged in — redirect to login page
+            window.location.href = '/';
+        }
+
+        // parse the stored user data and populate the UI
+        try {
+            const user = JSON.parse(userData);
+            
+            // set user name in the top bar
+            document.getElementById('userName').textContent = user.fullName || 'User';
+            
+            // format the role name nicely (e.g. "fleet_manager" → "Fleet Manager")
+            const roleDisplay = (user.role || '')
+                .split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            document.getElementById('userRole').textContent = roleDisplay;
+            
+            // avatar shows first letter of name
+            const initials = (user.fullName || 'U').charAt(0).toUpperCase();
+            document.getElementById('userAvatar').textContent = initials;
+            
+            // personalized welcome
+            document.getElementById('welcomeMessage').textContent = 
+                `Welcome back, ${user.fullName?.split(' ')[0] || 'User'}! 👋`;
+
+            // hide sidebar links the user doesn't have permission to access
+            if (user.permissions) {
+                const navLinks = document.querySelectorAll('.nav-link[data-module]');
+                navLinks.forEach(link => {
+                    const module = link.getAttribute('data-module');
+                    // dashboard is always visible
+                    if (module !== 'dashboard' && user.permissions[module] === false) {
+                        link.style.opacity = '0.3';
+                        link.style.pointerEvents = 'none';
+                        link.title = 'You do not have access to this module';
+                    }
+                });
+            }
+
+        } catch (err) {
+            console.error('Error loading user data:', err);
+        }
+
+        // handle logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('transitops_token');
+            localStorage.removeItem('transitops_user');
+            window.location.href = '/';
+        });
+
+        // ---- Mobile Sidebar Navigation Toggle ----
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const menuToggleBtn = document.getElementById('menuToggleBtn');
+
+        if (menuToggleBtn && sidebar && sidebarOverlay) {
+            menuToggleBtn.addEventListener('click', () => {
+                sidebar.classList.add('open');
+                sidebarOverlay.classList.add('visible');
+            });
+
+            // Close sidebar when clicking overlay
+            sidebarOverlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('visible');
+            });
+
+            // Close sidebar when clicking any navigation link (useful for SPA behavior later)
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    sidebar.classList.remove('open');
+                    sidebarOverlay.classList.remove('visible');
+                });
+            });
+        }
+    </script>
+</body>
+</html>

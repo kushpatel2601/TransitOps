@@ -1,0 +1,278 @@
+/* ==========================================================
+ * dashboard.css — Styles for the main dashboard shell
+ *
+ * Handles sidebar layout, top header bar, user details,
+ * and responsive/adjustable grid layout for all screen sizes.
+ * ========================================================== */
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ---- Sidebar Navigation ---- */
+.sidebar {
+    width: 240px;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-lg) 0;
+    flex-shrink: 0;
+    transition: transform var(--transition-normal);
+    z-index: 1000;
+}
+
+.sidebar-brand {
+    padding: 0 var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.sidebar-brand h1 {
+    font-size: var(--font-size-lg);
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.sidebar-brand span {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 var(--space-sm);
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 0.7rem var(--space-md);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.nav-link.active {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.nav-link .nav-icon {
+    font-size: 1.15rem;
+    width: 24px;
+    text-align: center;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: var(--space-lg) var(--space-lg) 0;
+    border-top: 1px solid var(--border-color);
+}
+
+/* ---- Main Content Area ---- */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* prevents flex child from expanding beyond viewport */
+}
+
+/* top header bar */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) var(--space-xl);
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* mobile hamburger menu toggle */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: var(--radius-sm);
+}
+
+.menu-toggle:hover {
+    background-color: var(--bg-input);
+}
+
+.topbar-title {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    color: var(--text-on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+}
+
+.user-name {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.user-role {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.btn-logout {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family);
+    transition: all var(--transition-fast);
+}
+
+.btn-logout:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+/* page content area */
+.page-content {
+    padding: var(--space-xl);
+    flex: 1;
+}
+
+/* Welcome banner */
+.welcome-banner {
+    background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-surface-light) 100%);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+}
+
+.welcome-banner h2 {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--space-sm);
+}
+
+.welcome-banner p {
+    color: var(--text-secondary);
+}
+
+/* quick info message */
+.dev-notice {
+    background-color: var(--color-info-bg);
+    color: var(--color-info);
+    border: 1px solid rgba(52, 152, 219, 0.25);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+}
+
+/* ---- Responsive & Screen Adjustability ---- */
+
+@media (max-width: 992px) {
+    .page-content {
+        padding: var(--space-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    /* show the hamburger menu toggle */
+    .menu-toggle {
+        display: block;
+        margin-right: var(--space-sm);
+    }
+
+    .topbar {
+        padding: var(--space-md) var(--space-lg);
+        justify-content: flex-start;
+    }
+
+    .topbar-title {
+        margin-right: auto;
+    }
+
+    /* collapse/slide sidebar out of view by default */
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* backdrop when sidebar is open */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        z-index: 999;
+    }
+
+    .sidebar-overlay.visible {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .topbar-actions .user-info {
+        display: none; /* hide redundant user details on narrow mobile ports */
+    }
+
+    .page-content {
+        padding: var(--space-md);
+    }
+
+    .welcome-banner {
+        padding: var(--space-md);
+    }
+}

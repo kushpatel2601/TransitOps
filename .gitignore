@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# environment variables — never commit secrets
+.env
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# IDE configs
+.vscode/
+.idea/
+
+# logs
+*.log
+npm-debug.log*
