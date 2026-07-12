@@ -85,7 +85,7 @@ async function getDashboardStats(req, res) {
 async function getVehicleCounts() {
     const result = await db.query(`
         SELECT 
-            COUNT(*) FILTER (WHERE status = 'active')      AS active,
+            COUNT(*) FILTER (WHERE status != 'inactive')    AS active,
             COUNT(*) FILTER (WHERE status = 'available')    AS available,
             COUNT(*) FILTER (WHERE status = 'maintenance')  AS maintenance
         FROM vehicles
@@ -138,22 +138,28 @@ async function getDriversOnDuty() {
 async function getRecentTrips() {
     const result = await db.query(`
         SELECT 
-            t.id,
-            t.status,
-            t.departure_time,
-            t.arrival_time,
-            t.actual_departure,
-            t.actual_arrival,
-            t.notes,
+            v.id AS id,
             v.registration_no AS vehicle_reg,
+            v.model AS vehicle_model,
             v.vehicle_type,
-            d.full_name AS driver_name,
-            r.route_name
-        FROM trips t
-        LEFT JOIN vehicles v ON t.vehicle_id = v.id
-        LEFT JOIN drivers d  ON t.driver_id  = d.id
-        LEFT JOIN routes r   ON t.route_id   = r.id
-        ORDER BY t.created_at DESC
+            v.status AS vehicle_status,
+            t.status AS status,
+            t.arrival_time AS arrival_time,
+            t.driver_name AS driver_name
+        FROM vehicles v
+        LEFT JOIN LATERAL (
+            SELECT 
+                t_inner.id,
+                t_inner.status,
+                t_inner.arrival_time,
+                d.full_name AS driver_name
+            FROM trips t_inner
+            LEFT JOIN drivers d ON t_inner.driver_id = d.id
+            WHERE t_inner.vehicle_id = v.id
+            ORDER BY t_inner.departure_time DESC
+            LIMIT 1
+        ) t ON true
+        ORDER BY v.created_at DESC
         LIMIT 10
     `);
 

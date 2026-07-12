@@ -461,3 +461,29 @@ ul, ol {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* ---- Sidebar Logout Button ---- */
+.btn-sidebar-logout {
+    width: 100%;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    transition: all var(--transition-fast);
+    outline: none;
+}
+
+.btn-sidebar-logout:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+    background-color: rgba(231, 76, 60, 0.08);
+}

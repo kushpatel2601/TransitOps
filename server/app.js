@@ -34,8 +34,10 @@ app.use('/api/auth', require('./routes/authRoutes'));
 // dashboard stats and KPI data
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 
+// vehicle registry routes
+app.use('/api/vehicles', require('./routes/vehicleRoutes'));
+
 // TODO: add remaining route modules as we build them
-// app.use('/api/vehicles', require('./routes/vehicleRoutes'));
 // app.use('/api/drivers', require('./routes/driverRoutes'));
 // app.use('/api/trips', require('./routes/tripRoutes'));
 // app.use('/api/maintenance', require('./routes/maintenanceRoutes'));
@@ -55,6 +57,10 @@ app.get('/', (req, res) => {
 // serve the dashboard (and other pages) via their own HTML files
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'dashboard.html'));
+});
+
+app.get('/fleet', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'fleet.html'));
 });
 
 // catch-all: redirect unknown routes to login

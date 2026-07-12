@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TransitOps Vehicle Registry — Manage your fleet inventory, vehicle types, capacity, odometer readings, and costs.">
+    <title>TransitOps — Fleet Registry</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/fleet.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚍</text></svg>">
+</head>
+<body>
+    <!-- ======================================================
+         Fleet Registry — Main application view
+         
+         Layout: sidebar on the left, main content on the right.
+         Features filtering, searching, listing, and a modal
+         for adding/editing fleet vehicles.
+    ====================================================== -->
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="app-layout">
+        
+        <!-- ---- Sidebar Navigation ---- -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <h1>TransitOps</h1>
+            </div>
+
+            <nav class="sidebar-nav" id="sidebarNav">
+                <a href="/dashboard" class="nav-link" data-module="dashboard">
+                    <span class="nav-icon">📊</span> Dashboard
+                </a>
+                <a href="/fleet" class="nav-link active" data-module="vehicles">
+                    <span class="nav-icon">🚍</span> Fleet
+                </a>
+                <a href="/drivers" class="nav-link" data-module="drivers">
+                    <span class="nav-icon">👤</span> Drivers
+                </a>
+                <a href="/trips" class="nav-link" data-module="trips">
+                    <span class="nav-icon">🗺️</span> Trips
+                </a>
+                <a href="/maintenance" class="nav-link" data-module="maintenance">
+                    <span class="nav-icon">🔧</span> Maintenance
+                </a>
+                <a href="/fuel-expenses" class="nav-link" data-module="fuel_expenses">
+                    <span class="nav-icon">⛽</span> Fuel & Expenses
+                </a>
+                <a href="/analytics" class="nav-link" data-module="reports">
+                    <span class="nav-icon">📈</span> Analytics
+                </a>
+                <a href="/settings" class="nav-link" data-module="settings">
+                    <span class="nav-icon">⚙️</span> Settings
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-sidebar-logout" id="logoutBtn">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- ---- Main Content Area ---- -->
+        <div class="main-content">
+            
+            <!-- Top bar with search and user details -->
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Navigation Menu">☰</button>
+                
+                <div class="topbar-search">
+                    <input type="text" class="search-input" id="globalSearch" placeholder="Search..." aria-label="Search">
+                </div>
+
+                <div class="topbar-actions">
+                    <div class="user-info">
+                        <span class="user-name" id="userName">User</span>
+                    </div>
+                    <div class="role-badge" id="roleBadge">—</div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="page-content">
+                
+                <!-- Filters and Actions Toolbar -->
+                <div class="toolbar-row">
+                    <div class="filters-group">
+                        <select class="filter-select" id="filterType">
+                            <option value="">Type: All</option>
+                            <option value="bus">Bus</option>
+                            <option value="van">Van</option>
+                            <option value="minibus">Mini</option>
+                            <option value="truck">Truck</option>
+                        </select>
+                        <select class="filter-select" id="filterStatus">
+                            <option value="">Status: All</option>
+                            <option value="available">Available</option>
+                            <option value="active">On Trip</option>
+                            <option value="maintenance">In Shop</option>
+                            <option value="inactive">Retired</option>
+                        </select>
+                        <div class="search-reg-box">
+                            <input type="text" class="search-reg-input" id="searchRegNo" placeholder="Search reg. no...">
+                        </div>
+                    </div>
+                    
+                    <button class="btn-add-vehicle" id="btnAddVehicle">
+                        <span class="plus-icon">+</span> Add Vehicle
+                    </button>
+                </div>
+
+                <!-- Vehicles Registry Panel -->
+                <div class="panel fleet-panel">
+                    <table class="data-table" id="fleetTable">
+                        <thead>
+                            <tr>
+                                <th>REG. NO. (UNIQUE)</th>
+                                <th>NAME/MODEL</th>
+                                <th>TYPE</th>
+                                <th>CAPACITY</th>
+                                <th>ODOMETER</th>
+                                <th>ACQ. COST</th>
+                                <th>STATUS</th>
+                                <th class="text-right">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fleetTableBody">
+                            <tr>
+                                <td colspan="8" class="loading-text">Loading vehicles...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Footer Business Rule Notice -->
+                <div class="business-rule-notice">
+                    Rule: Registration No. must be unique · Retired/In Shop vehicles are hidden from Trip Dispatcher
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Vehicle Modal Dialog -->
+    <div class="modal" id="vehicleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add New Vehicle</h3>
+                <button class="modal-close" id="btnModalClose">&times;</button>
+            </div>
+            <form id="vehicleForm">
+                <input type="hidden" id="vehicleId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="regNo">Registration Number (Unique) *</label>
+                        <input type="text" id="regNo" required placeholder="e.g. GJ01AB4521">
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicleModel">Name/Model *</label>
+                        <input type="text" id="vehicleModel" required placeholder="e.g. VAN-05">
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicleType">Vehicle Type *</label>
+                        <select id="vehicleType" required>
+                            <option value="van">Van</option>
+                            <option value="truck">Truck</option>
+                            <option value="minibus">Mini</option>
+                            <option value="bus">Bus</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="capacity">Capacity (Tons / seats) *</label>
+                        <input type="number" id="capacity" required min="0" step="any" placeholder="e.g. 0.5 or 5">
+                    </div>
+                    <div class="form-group">
+                        <label for="odometer">Odometer (km) *</label>
+                        <input type="number" id="odometer" required min="0" placeholder="e.g. 74000">
+                    </div>
+                    <div class="form-group">
+                        <label for="acqCost">Acquisition Cost (₹) *</label>
+                        <input type="number" id="acqCost" required min="0" placeholder="e.g. 620000">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status *</label>
+                        <select id="status" required>
+                            <option value="available">Available</option>
+                            <option value="active">On Trip</option>
+                            <option value="maintenance">In Shop</option>
+                            <option value="inactive">Retired</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fuelType">Fuel Type</label>
+                        <select id="fuelType">
+                            <option value="diesel">Diesel</option>
+                            <option value="cng">CNG</option>
+                            <option value="petrol">Petrol</option>
+                            <option value="electric">Electric</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btnCancel">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btnSave">Save Vehicle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/fleet.js"></script>
+</body>
+</html>

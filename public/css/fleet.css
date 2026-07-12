@@ -1,0 +1,321 @@
+/* ==========================================================
+ * fleet.css — Styles specific to the Vehicle Registry
+ *
+ * Handles filters toolbar, Add Vehicle button, status badges,
+ * Indian rupee currency formatting alignments, business rules,
+ * edit/delete action items, and the entry modal.
+ * ========================================================== */
+
+/* ---- Toolbar row with filters and Add button ---- */
+.toolbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.filters-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+/* custom search input box for registration search */
+.search-reg-box {
+    position: relative;
+    min-width: 180px;
+}
+
+.search-reg-input {
+    width: 100%;
+    padding: 0.4rem 0.8rem;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family);
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.search-reg-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-reg-input:focus {
+    border-color: var(--color-primary);
+}
+
+/* Add Vehicle orange button matching wireframe */
+.btn-add-vehicle {
+    background-color: #d35400; /* premium deep orange */
+    color: var(--text-on-primary);
+    border: none;
+    padding: 0.45rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-add-vehicle:hover {
+    background-color: #e67e22;
+    transform: translateY(-1px);
+}
+
+.plus-icon {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+}
+
+
+/* ---- Fleet Table Enhancements ---- */
+.fleet-panel {
+    margin-bottom: var(--space-md);
+    overflow-x: auto;
+}
+
+/* status badges for fleet status */
+.badge-status {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-align: center;
+    min-width: 90px;
+}
+
+.badge-status.available {
+    background-color: rgba(39, 174, 96, 0.2);
+    color: #2ecc71;
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.badge-status.active, 
+.badge-status.on-trip {
+    background-color: rgba(41, 128, 185, 0.2);
+    color: #3498db;
+    border: 1px solid rgba(41, 128, 185, 0.3);
+}
+
+.badge-status.maintenance, 
+.badge-status.in-shop {
+    background-color: rgba(211, 84, 0, 0.2);
+    color: #e67e22;
+    border: 1px solid rgba(211, 84, 0, 0.3);
+}
+
+.badge-status.inactive, 
+.badge-status.retired {
+    background-color: rgba(192, 57, 43, 0.2);
+    color: #e74c3c;
+    border: 1px solid rgba(192, 57, 43, 0.3);
+}
+
+/* text alignments */
+.text-right {
+    text-align: right;
+}
+
+/* action buttons in row */
+.actions-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+.btn-action {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-action:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+.btn-action.delete:hover {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
+}
+
+
+/* ---- Footer business rule notice ---- */
+.business-rule-notice {
+    font-size: var(--font-size-xs);
+    color: #d35400; /* matching the warning/rule text */
+    font-weight: 500;
+    margin-top: var(--space-md);
+    letter-spacing: 0.02em;
+}
+
+
+/* ---- Form Modal Styling ---- */
+.modal {
+    display: none; /* hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 580px;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.3s ease;
+    overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: var(--space-lg) var(--space-xl);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-title {
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+#vehicleForm {
+    padding: var(--space-xl);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.form-group label {
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input, 
+.form-group select {
+    padding: 0.5rem 0.8rem;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family);
+    outline: none;
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    border-color: var(--color-primary);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--space-lg);
+}
+
+.modal-actions button {
+    padding: 0.5rem 1.2rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: all var(--transition-fast);
+}
+
+.modal-actions .btn-secondary {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.modal-actions .btn-secondary:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+}
+
+.modal-actions .btn-primary {
+    background-color: #d35400;
+    color: #fff;
+    border: none;
+}
+
+.modal-actions .btn-primary:hover {
+    background-color: #e67e22;
+}
+
+/* responsive modal layout */
+@media (max-width: 580px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}

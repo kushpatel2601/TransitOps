@@ -175,8 +175,8 @@ function renderRecentTrips(trips) {
         // generate a short trip ID like "TR001"
         const tripId = `TR${String(trip.id).padStart(3, '0')}`;
 
-        // vehicle registration or dash if not assigned
-        const vehicle = trip.vehicle_reg || '—';
+        // vehicle model/name (falls back to registration number if not set)
+        const vehicle = trip.vehicle_model || trip.vehicle_reg || '—';
 
         // driver name or dash if unassigned
         const driver = trip.driver_name || '—';
@@ -210,35 +210,41 @@ function renderVehicleStatus(statuses) {
     const container = document.getElementById('vehicleStatusBars');
     if (!container) return;
 
-    if (!statuses || statuses.length === 0) {
-        container.innerHTML = '<div class="loading-text">No vehicle data.</div>';
-        return;
-    }
-
-    // figure out the max count so we can scale the bars
-    const maxCount = Math.max(...statuses.map(s => parseInt(s.count)));
-
-    // map DB status names to nice display labels
-    const labelMap = {
-        'available': 'Available',
-        'active': 'On Trip',
-        'on_trip': 'On Trip',
-        'maintenance': 'In Shop',
-        'in_shop': 'In Shop',
-        'retired': 'Retired',
-        'inactive': 'Retired'
+    // track count for each status key
+    const counts = {
+        'available': 0,
+        'active': 0,
+        'maintenance': 0,
+        'inactive': 0
     };
 
-    container.innerHTML = statuses.map(s => {
-        const label = labelMap[s.status] || s.status;
-        const count = parseInt(s.count);
-        const widthPercent = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
+    if (statuses && statuses.length > 0) {
+        statuses.forEach(s => {
+            const key = s.status === 'on_trip' ? 'active' : (s.status === 'in_shop' ? 'maintenance' : (s.status === 'retired' ? 'inactive' : s.status));
+            counts[key] = (counts[key] || 0) + (parseInt(s.count) || 0);
+        });
+    }
+
+    // fixed display order matching the wireframe
+    const orderedStatuses = [
+        { key: 'available', label: 'Available', cssClass: 'available' },
+        { key: 'active', label: 'On Trip', cssClass: 'active' },
+        { key: 'maintenance', label: 'In Shop', cssClass: 'maintenance' },
+        { key: 'inactive', label: 'Retired', cssClass: 'retired' }
+    ];
+
+    // find max count to scale widths (avoid dividing by 0)
+    const maxCount = Math.max(...Object.values(counts), 1);
+
+    container.innerHTML = orderedStatuses.map(s => {
+        const count = counts[s.key] || 0;
+        const widthPercent = Math.round((count / maxCount) * 100);
 
         return `
             <div class="status-bar-row">
-                <span class="status-bar-label">${label}</span>
+                <span class="status-bar-label">${s.label}</span>
                 <div class="status-bar-track">
-                    <div class="status-bar-fill ${s.status}" style="width: ${widthPercent}%"></div>
+                    <div class="status-bar-fill ${s.cssClass}" style="width: ${widthPercent}%"></div>
                 </div>
             </div>
         `;

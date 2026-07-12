@@ -26,6 +26,10 @@ async function seedDatabase() {
     try {
         console.log('🚀 Starting database seed...\n');
 
+        // Clean slate before seeding to avoid ID mismatch/conflicts from prior runs
+        console.log('🧹 Cleaning existing database records...');
+        await client.query('TRUNCATE TABLE expenses, fuel_logs, maintenance_records, trips, drivers, vehicles, routes, users RESTART IDENTITY CASCADE;');
+
         // hash a common dev password for all seed users
         const hashedPassword = await bcrypt.hash('password123', 10);
 
@@ -42,13 +46,13 @@ async function seedDatabase() {
 
         // ---- Vehicles ----
         await client.query(`
-            INSERT INTO vehicles (registration_no, vehicle_type, make, model, year, capacity, status, current_mileage, fuel_type, last_service_date) VALUES
-                ('MH-01-AB-1234', 'bus', 'Tata', 'Starbus', 2022, 52, 'active', 45230.50, 'diesel', '2026-06-15'),
-                ('MH-02-CD-5678', 'minibus', 'Force', 'Traveller', 2023, 26, 'active', 32100.00, 'diesel', '2026-05-20'),
-                ('MH-01-EF-9012', 'van', 'Mahindra', 'Supro', 2024, 12, 'maintenance', 18750.25, 'cng', '2026-07-01'),
-                ('MH-03-GH-3456', 'bus', 'Ashok Leyland', 'Viking', 2021, 48, 'active', 67890.00, 'diesel', '2026-04-10'),
-                ('MH-04-IJ-7890', 'minibus', 'Eicher', 'Skyline', 2023, 30, 'inactive', 28450.75, 'diesel', '2026-03-25'),
-                ('MH-01-KL-2345', 'bus', 'Tata', 'Urban', 2024, 40, 'active', 12300.00, 'electric', '2026-06-28')
+            INSERT INTO vehicles (registration_no, vehicle_type, make, model, year, capacity, status, current_mileage, fuel_type, last_service_date, acquisition_cost) VALUES
+                ('GJ01AB4521', 'van', 'Tata', 'VAN-05', 2022, 0.5, 'available', 74000.00, 'diesel', '2026-06-15', 620000.00),
+                ('GJ01AB9981', 'truck', 'Ashok Leyland', 'TRUCK-11', 2023, 5, 'active', 182000.00, 'diesel', '2026-05-20', 2450000.00),
+                ('GJ01AB1120', 'minibus', 'Mahindra', 'MINI-03', 2024, 1, 'maintenance', 66000.00, 'cng', '2026-07-01', 410000.00),
+                ('GJ01AB0008', 'van', 'Maruti', 'VAN-09', 2021, 0.75, 'inactive', 241900.00, 'diesel', '2026-04-10', 590000.00),
+                ('MH-04-IJ-7890', 'minibus', 'Eicher', 'Skyline', 2023, 30, 'inactive', 28450.75, 'diesel', '2026-03-25', 1250000.00),
+                ('MH-01-KL-2345', 'bus', 'Tata', 'Urban', 2024, 40, 'available', 12300.00, 'electric', '2026-06-28', 3500000.00)
             ON CONFLICT (registration_no) DO NOTHING;
         `);
         console.log('✓ Vehicles seeded');
@@ -56,9 +60,9 @@ async function seedDatabase() {
         // ---- Drivers ----
         await client.query(`
             INSERT INTO drivers (full_name, license_no, license_expiry, phone, email, status, safety_score, total_trips, violations) VALUES
-                ('Rajesh Kumar', 'DL-0420230012345', '2028-03-15', '+91 9876543210', 'rajesh@email.com', 'active', 95.50, 342, 2),
-                ('Sunil Patil', 'MH-0120220098765', '2027-11-30', '+91 9876543211', 'sunil@email.com', 'active', 88.00, 278, 5),
-                ('Amit Joshi', 'MH-0220240056789', '2029-06-20', '+91 9876543212', 'amit@email.com', 'on_leave', 92.75, 156, 1),
+                ('Alex', 'DL-0420230012345', '2028-03-15', '+91 9876543210', 'alex@transitops.in', 'active', 95.50, 342, 2),
+                ('John', 'MH-0120220098765', '2027-11-30', '+91 9876543211', 'john@transitops.in', 'active', 88.00, 278, 5),
+                ('Priya', 'MH-0220240056789', '2029-06-20', '+91 9876543212', 'priya@transitops.in', 'active', 92.75, 156, 1),
                 ('Deepak Singh', 'MH-0320210034567', '2026-12-31', '+91 9876543213', 'deepak@email.com', 'active', 78.25, 410, 8),
                 ('Vikram Rao', 'MH-0120250011111', '2030-01-15', '+91 9876543214', 'vikram@email.com', 'suspended', 45.00, 89, 15)
             ON CONFLICT (license_no) DO NOTHING;
@@ -77,15 +81,13 @@ async function seedDatabase() {
         `);
         console.log('✓ Routes seeded');
 
-        // ---- Trips ----
+        // ---- Trips (Inserted oldest-to-newest so ORDER BY created_at DESC matches wireframe sequence) ----
         await client.query(`
             INSERT INTO trips (route_id, vehicle_id, driver_id, departure_time, arrival_time, status, passenger_count, notes) VALUES
-                (1, 1, 1, '2026-07-12 08:00:00', '2026-07-12 08:35:00', 'completed', 38, 'Morning rush — on time'),
-                (2, 2, 2, '2026-07-12 09:00:00', '2026-07-12 09:55:00', 'in_progress', 22, NULL),
-                (3, 4, 4, '2026-07-12 10:30:00', '2026-07-12 11:15:00', 'scheduled', 0, 'Regular weekday shuttle'),
-                (1, 6, 1, '2026-07-12 14:00:00', '2026-07-12 14:35:00', 'scheduled', 0, 'Afternoon return'),
-                (4, 1, 2, '2026-07-12 17:00:00', '2026-07-12 17:25:00', 'delayed', 0, 'Traffic congestion expected'),
-                (5, 2, 4, '2026-07-12 18:30:00', NULL, 'cancelled', 0, 'Vehicle reassigned to Route B2')
+                (NULL, NULL, NULL, NOW(), NULL, 'draft', 0, NULL),
+                (3, 3, 3, NOW(), NOW() + INTERVAL '70 minutes', 'scheduled', 0, NULL),
+                (2, 2, 2, NOW(), NOW(), 'completed', 0, NULL),
+                (1, 1, 1, NOW(), NOW() + INTERVAL '45 minutes', 'in_progress', 0, NULL)
             ON CONFLICT DO NOTHING;
         `);
         console.log('✓ Trips seeded');
