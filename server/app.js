@@ -43,10 +43,16 @@ app.use('/api/drivers', require('./routes/driverRoutes'));
 // trip dispatching routes
 app.use('/api/trips', require('./routes/tripRoutes'));
 
+// maintenance service records
+app.use('/api/maintenance', require('./routes/maintenanceRoutes'));
+
+// fuel logging
+app.use('/api/fuel', require('./routes/fuelRoutes'));
+
+// expense tracking (tolls, fines, etc.)
+app.use('/api/expenses', require('./routes/expenseRoutes'));
+
 // TODO: add remaining route modules as we build them
-// app.use('/api/maintenance', require('./routes/maintenanceRoutes'));
-// app.use('/api/fuel', require('./routes/fuelRoutes'));
-// app.use('/api/expenses', require('./routes/expenseRoutes'));
 // app.use('/api/reports', require('./routes/reportRoutes'));
 // app.use('/api/settings', require('./routes/settingsRoutes'));
 
@@ -73,6 +79,14 @@ app.get('/drivers', (req, res) => {
 
 app.get('/trips', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'trips.html'));
+});
+
+app.get('/maintenance', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'maintenance.html'));
+});
+
+app.get('/fuel-expenses', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'fuel-expenses.html'));
 });
 
 // catch-all: redirect unknown routes to login

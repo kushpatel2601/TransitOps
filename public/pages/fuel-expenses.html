@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TransitOps Fuel & Expenses — Track fuel refuelings, tolls, repairs, fines, and calculate total operational costs.">
+    <title>TransitOps — Fuel & Expenses</title>
+
+    <!-- global design tokens + shared components -->
+    <link rel="stylesheet" href="/css/global.css">
+    <!-- sidebar, topbar, and page shell layout -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <!-- fleet badge styles reused by expense payment status badges -->
+    <link rel="stylesheet" href="/css/fleet.css">
+    <!-- fuel-expense-specific: panels, action buttons, cost summary row -->
+    <link rel="stylesheet" href="/css/fuel-expenses.css">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚍</text></svg>">
+</head>
+<body>
+
+    <!-- mobile sidebar backdrop -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-layout">
+
+        <!-- ===================== SIDEBAR ===================== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <h1>TransitOps</h1>
+            </div>
+
+            <nav class="sidebar-nav" id="sidebarNav">
+                <a href="/dashboard"     class="nav-link" data-module="dashboard">     <span class="nav-icon">📊</span> Dashboard</a>
+                <a href="/fleet"         class="nav-link" data-module="vehicles">      <span class="nav-icon">🚍</span> Fleet</a>
+                <a href="/drivers"       class="nav-link" data-module="drivers">       <span class="nav-icon">👤</span> Drivers</a>
+                <a href="/trips"         class="nav-link" data-module="trips">         <span class="nav-icon">🗺️</span> Trips</a>
+                <a href="/maintenance"   class="nav-link" data-module="maintenance">   <span class="nav-icon">🔧</span> Maintenance</a>
+                <a href="/fuel-expenses" class="nav-link active" data-module="fuel_expenses"><span class="nav-icon">⛽</span> Fuel & Expenses</a>
+                <a href="/analytics"     class="nav-link" data-module="reports">       <span class="nav-icon">📈</span> Analytics</a>
+                <a href="/settings"      class="nav-link" data-module="settings">      <span class="nav-icon">⚙️</span> Settings</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-sidebar-logout" id="logoutBtn">🚪 Logout</button>
+            </div>
+        </aside>
+        <!-- =================== END SIDEBAR =================== -->
+
+
+        <!-- ==================== MAIN CONTENT ==================== -->
+        <div class="main-content">
+
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Menu">☰</button>
+                <div class="topbar-search">
+                    <input
+                        type="text"
+                        class="search-input"
+                        id="globalSearch"
+                        placeholder="Search vehicle or category..."
+                        aria-label="Search fuel and expenses"
+                    >
+                </div>
+                <div class="topbar-actions">
+                    <span class="user-name" id="userName">User</span>
+                    <div class="role-badge" id="roleBadge">—</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+
+                <!-- inline page-level feedback (success / error) -->
+                <div id="pageBanner" class="exp-banner" role="alert" aria-live="polite"></div>
+
+                <!-- page title + action buttons row -->
+                <div class="expense-header-row">
+                    <h2 class="section-title-m">Fuel & Expenses Logs</h2>
+                    <div class="actions-group-row">
+                        <button class="btn-action-exp" id="btnLogFuel">+ Log Fuel</button>
+                        <button class="btn-action-exp" id="btnAddExpense">+ Add Expense</button>
+                    </div>
+                </div>
+
+
+                <!-- ---- FUEL LOGS table ---- -->
+                <div class="panel expense-panel">
+                    <h3 class="panel-title">FUEL LOGS</h3>
+                    <table class="data-table" id="fuelTable">
+                        <thead>
+                            <tr>
+                                <th>VEHICLE</th>
+                                <th>DATE</th>
+                                <th>LITERS</th>
+                                <th>FUEL COST (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fuelTableBody">
+                            <!-- populated by fuel-expenses.js -->
+                            <tr>
+                                <td colspan="4" class="loading-text">Loading fuel logs...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <!-- ---- OTHER EXPENSES table ---- -->
+                <div class="panel expense-panel">
+                    <h3 class="panel-title">OTHER EXPENSES (TOLL / MISC)</h3>
+                    <table class="data-table" id="expensesTable">
+                        <thead>
+                            <tr>
+                                <th>VEHICLE</th>
+                                <th>DATE</th>
+                                <th>CATEGORY</th>
+                                <th>AMOUNT (₹)</th>
+                                <th>DESCRIPTION</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesTableBody">
+                            <tr>
+                                <td colspan="5" class="loading-text">Loading expenses...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <!-- auto-calculated total across fuel + maintenance + expenses -->
+                <div class="total-cost-summary-row">
+                    <span class="cost-summary-label">TOTAL OPERATIONAL COST (AUTO) = FUEL + MAINT</span>
+                    <span class="cost-summary-value" id="totalOperationalCostVal">—</span>
+                </div>
+
+            </div>
+            <!-- end .page-content -->
+
+        </div>
+        <!-- end .main-content -->
+
+    </div>
+    <!-- end .app-layout -->
+
+
+    <!-- ====================== LOG FUEL MODAL ====================== -->
+    <!--
+        Opens when the user clicks "+ Log Fuel".
+        Vehicle dropdown is populated dynamically by JS.
+        Total cost auto-calculates from qty × price/liter.
+    -->
+    <div class="modal" id="fuelModal" role="dialog" aria-modal="true" aria-labelledby="fuelModalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="fuelModalTitle">Log Refueling Event</h3>
+                <button class="modal-close" id="btnFuelModalClose" aria-label="Close">&times;</button>
+            </div>
+
+            <!-- novalidate so we control all error messaging in JS -->
+            <form id="fuelForm" novalidate>
+                <div class="form-grid" style="padding: var(--space-xl);">
+
+                    <div class="form-group">
+                        <label for="fuelVehicle">Vehicle *</label>
+                        <select id="fuelVehicle" required class="form-select"></select>
+                        <span class="field-error" id="errFuelVehicle"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuelType">Fuel Type</label>
+                        <select id="fuelType" class="form-select">
+                            <option value="diesel">Diesel</option>
+                            <option value="petrol">Petrol</option>
+                            <option value="cng">CNG</option>
+                            <option value="electric">Electric</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuelQty">Liters *</label>
+                        <input type="number" id="fuelQty" required step="0.01" min="0.01" placeholder="e.g. 45">
+                        <span class="field-error" id="errFuelQty"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuelPrice">Price / Liter (₹)</label>
+                        <input type="number" id="fuelPrice" step="0.01" min="0" placeholder="e.g. 90">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuelTotalCost">Total Cost (₹) *</label>
+                        <input type="number" id="fuelTotalCost" required step="0.01" min="0.01" placeholder="e.g. 4050">
+                        <span class="field-error" id="errFuelTotal"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuelOdometer">Odometer (km)</label>
+                        <input type="number" id="fuelOdometer" min="0" placeholder="e.g. 23500">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuelDate">Date</label>
+                        <input type="date" id="fuelDate">
+                    </div>
+
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btnFuelCancel">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btnFuelSubmit">Save Log</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- =================== END FUEL MODAL =================== -->
+
+
+    <!-- ====================== ADD EXPENSE MODAL ====================== -->
+    <div class="modal" id="expenseModal" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="expenseModalTitle">Add Fleet Expense</h3>
+                <button class="modal-close" id="btnExpenseModalClose" aria-label="Close">&times;</button>
+            </div>
+
+            <form id="expenseForm" novalidate>
+                <div class="form-grid" style="padding: var(--space-xl);">
+
+                    <div class="form-group">
+                        <label for="expenseVehicle">Vehicle *</label>
+                        <select id="expenseVehicle" required class="form-select"></select>
+                        <span class="field-error" id="errExpVehicle"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expenseCategory">Category *</label>
+                        <select id="expenseCategory" required class="form-select">
+                            <option value="" disabled selected>Select category...</option>
+                            <option value="toll">Toll</option>
+                            <option value="parking">Parking</option>
+                            <option value="fine">Fine</option>
+                            <option value="insurance">Insurance</option>
+                            <option value="repair">Repair</option>
+                            <option value="misc">Miscellaneous</option>
+                        </select>
+                        <span class="field-error" id="errExpCategory"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expenseAmount">Amount (₹) *</label>
+                        <input type="number" id="expenseAmount" required min="0.01" step="0.01" placeholder="e.g. 500">
+                        <span class="field-error" id="errExpAmount"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expenseDate">Date</label>
+                        <input type="date" id="expenseDate">
+                    </div>
+
+                    <!-- description spans both grid columns -->
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="expenseDesc">Description</label>
+                        <input type="text" id="expenseDesc" maxlength="255" placeholder="e.g. Expressway toll fee">
+                    </div>
+
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btnExpenseCancel">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btnExpenseSubmit">Save Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- =================== END EXPENSE MODAL =================== -->
+
+    <script src="/js/fuel-expenses.js"></script>
+</body>
+</html>

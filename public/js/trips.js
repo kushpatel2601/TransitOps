@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLiveBoard();
     setupFormEvents();
     setupSidebarToggle();
+    setupLogout();
 });
 
 
@@ -467,16 +468,35 @@ window.updateTripStatus = async function(id, newStatus) {
 // ---- Sidebar toggle & navigation helper ----
 
 function setupSidebarToggle() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
+    const sidebar   = document.getElementById('sidebar');
+    const overlay   = document.getElementById('sidebarOverlay');
     const toggleBtn = document.getElementById('menuToggleBtn');
 
     if (!toggleBtn || !sidebar || !overlay) return;
 
+    // toggle open/close on each press of the hamburger button
     toggleBtn.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        overlay.classList.add('visible');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('visible');
     });
+
+    // tapping the dark backdrop also closes the sidebar
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+    });
+}
+
+
+/**
+ * Wire the sidebar logout button.
+ * Called once during page init so the button works on every tab.
+ */
+function setupLogout() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
 }
 
 

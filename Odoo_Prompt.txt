@@ -1,0 +1,71 @@
+# Odoo Hackathon — Project Build Prompt
+
+Use this as a system/instruction prompt for yourself or an AI coding assistant while building your hackathon submission. It consolidates every requirement mentioned in the organizer's briefing video.
+
+## Context
+This is a **hiring hackathon** — the goal isn't just to finish fast, it's to demonstrate strong engineering judgment. Reviewers are evaluating you as a potential hire, not just grading a demo.
+
+## Core Philosophy
+- Approach the chosen problem statement **thoughtfully**, not by rushing to code.
+- Prioritize **scalable, well-structured, clean code** over speed.
+- Treat this as a showcase of your **development skills and logical thinking**.
+
+## Mandatory Technical Requirements
+
+**1. Database Design & Setup**
+- Model data properly with a real backend and API layer.
+- Use a **local/self-hosted database** (e.g., MySQL, PostgreSQL).
+- Do **not** rely on Backend-as-a-Service platforms (Firebase, Supabase, MongoDB Atlas, etc.).
+
+**2. Build From Scratch**
+- Minimize third-party APIs/dependencies.
+- Reduces risk of being blocked by bugs/downtime in someone else's platform.
+
+**3. Real, Dynamic Data**
+- Use real-time/dynamic data end-to-end.
+- Static JSON is acceptable only for early prototyping — **not** for the final solution.
+
+**4. Robust Input Validation**
+- Handle user errors gracefully everywhere.
+- Example: invalid email entry must return clear, specific feedback to the user (not a silent failure or generic error).
+
+**5. Git Discipline**
+- Full team must use version control actively — one person owning the repo is not enough.
+- Commit history should reflect real collaboration.
+
+**6. Clean, Interactive UI**
+- Consistent color scheme and layout.
+- Intuitive navigation and menus.
+- Proper spacing and visual flow.
+- UI is explicitly called "the face of your project" — treat it as a first-class deliverable, not an afterthought.
+
+**7. Responsible Use of AI/Blockchain/Chatbots (optional)**
+- Fine to use if it **genuinely adds value** to the solution — not just for buzzword appeal.
+- You must understand the tools/code you use — no blind copy-paste. Be ready to explain what a piece of code does and why it's there.
+
+## Team & Presentation
+- Everyone on the team should participate in the final presentation.
+- It's judged as **shared ownership and teamwork**, not just who's the best speaker.
+
+## Evaluation Criteria (what reviewers score)
+- Coding standards: logic, modularity, front-end design
+- Performance and scalability
+- Security
+- Usability
+- Debugging skill
+- **Database design** (explicitly emphasized as a top priority)
+- Approach to the problem statement
+- Modular architecture and coding patterns
+- Attention to detail
+
+## Practical Build Checklist
+- [ ] Problem statement chosen and understood deeply before coding
+- [ ] Local DB (PostgreSQL/MySQL) set up with a proper schema
+- [ ] Custom backend + API (no BaaS shortcuts)
+- [ ] Real/dynamic data wired end-to-end (no leftover mock JSON)
+- [ ] Input validation with user-facing error feedback on every form/input
+- [ ] All team members committing to Git regularly
+- [ ] UI: consistent colors, spacing, intuitive nav
+- [ ] Any AI/blockchain/chatbot usage is justified and understood, not decorative
+- [ ] Every team member can explain and present part of the project
+- [ ] Code is modular, documented, and easy to follow

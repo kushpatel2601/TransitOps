@@ -1,0 +1,258 @@
+/*
+ * maintenance.css
+ * -------------------------------------------
+ * Styles specific to the Maintenance page.
+ *
+ * Covers:
+ *  - Two-column grid (form panel + log table)
+ *  - Service form inputs and save button
+ *  - Status badge variants (In Shop, Completed, Pending, Overdue)
+ *  - Business rule arrows section at the bottom
+ *  - Inline field-level error messages
+ *  - Page-level feedback banner
+ *  - Responsive collapse for small screens
+ * -------------------------------------------
+ */
+
+
+/* ---- Page feedback banner (success / error) ---- */
+
+.maint-banner {
+    /* hidden until JS adds a class */
+    display: none;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    margin-bottom: var(--space-lg);
+    animation: slideDown 0.25s ease;
+}
+
+.maint-banner.show-success {
+    display: block;
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.maint-banner.show-error {
+    display: block;
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ---- Two-column grid: form left, log right ---- */
+
+.maint-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-xl);
+}
+
+
+/* ---- Left panel — service log form ---- */
+
+.maint-form-panel {
+    padding: var(--space-lg);
+}
+
+/* tighten up the spacing between groups inside the form */
+.maint-form-panel .form-group {
+    margin-bottom: var(--space-md);
+}
+
+.maint-form-panel label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.3rem;
+}
+
+/* inputs and selects inside the form panel */
+.maint-form-panel .form-select,
+.maint-form-panel input[type="number"],
+.maint-form-panel input[type="date"] {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.maint-form-panel .form-select:focus,
+.maint-form-panel input[type="number"]:focus,
+.maint-form-panel input[type="date"]:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+/* highlight an invalid field after a failed submit attempt */
+.maint-form-panel input.invalid,
+.maint-form-panel select.invalid {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 2px var(--color-danger-bg);
+}
+
+/* per-field inline error message */
+.field-error {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--color-danger);
+    margin-top: 0.2rem;
+    min-height: 1em; /* reserves space so layout doesn't jump */
+}
+
+
+/* ---- Save button ---- */
+
+.btn-save-service {
+    width: 100%;
+    padding: 0.7rem;
+    margin-top: var(--space-md);
+    background-color: var(--color-primary);
+    color: #1a1a2e;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-save-service:hover {
+    background-color: #e0a800;
+    transform: translateY(-1px);
+}
+
+.btn-save-service:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* ---- Right panel — service log table ---- */
+
+.maint-log-panel {
+    /* allow horizontal scroll on narrow viewports */
+    overflow-x: auto;
+}
+
+
+/* ---- Status badges in the service log table ---- */
+
+.badge-maint {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-align: center;
+    min-width: 85px;
+    white-space: nowrap;
+}
+
+/* In Shop — orange, like the wireframe */
+.badge-maint.in-shop {
+    background-color: rgba(230, 126, 34, 0.2);
+    color: #e67e22;
+    border: 1px solid rgba(230, 126, 34, 0.3);
+}
+
+/* Completed — green */
+.badge-maint.completed {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+/* Pending — neutral grey */
+.badge-maint.pending {
+    background-color: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+    border: 1px solid rgba(149, 165, 166, 0.3);
+}
+
+/* Overdue — red */
+.badge-maint.overdue {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+
+/* ---- Business rule arrows section ---- */
+
+.maint-rules {
+    margin-top: var(--space-md);
+    padding: var(--space-md) 0;
+}
+
+.rule-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+/* Available / In Shop labels */
+.rule-label {
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+}
+
+.rule-label.available {
+    color: #2ecc71;
+    text-decoration: underline;
+}
+
+.rule-label.in-shop {
+    color: #e67e22;
+    text-decoration: underline;
+}
+
+/* the arrow/description text between labels */
+.rule-arrow {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+}
+
+/* note at the very bottom — orange to draw attention */
+.rule-note {
+    font-size: var(--font-size-xs);
+    color: #d35400;
+    font-weight: 500;
+    margin-top: var(--space-sm);
+    font-style: italic;
+}
+
+
+/* ---- Responsive — collapse to single column on tablets ---- */
+
+@media (max-width: 900px) {
+    .maint-layout {
+        grid-template-columns: 1fr;
+    }
+}

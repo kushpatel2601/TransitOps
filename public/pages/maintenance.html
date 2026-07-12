@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TransitOps Maintenance — Log and track vehicle service records, schedule repairs, and manage shop status.">
+    <title>TransitOps — Maintenance</title>
+
+    <!-- global design tokens + shared components -->
+    <link rel="stylesheet" href="/css/global.css">
+    <!-- sidebar, topbar, and page shell layout -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <!-- fleet badge styles (badge-status, btn-action, etc.) -->
+    <link rel="stylesheet" href="/css/fleet.css">
+    <!-- maintenance-specific: two-column layout, status badges, rule arrows -->
+    <link rel="stylesheet" href="/css/maintenance.css">
+
+    <!-- bus emoji favicon — keeps it recognisable in tabs -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚍</text></svg>">
+</head>
+<body>
+
+    <!-- dark overlay that appears behind the sidebar on mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-layout">
+
+        <!-- ===================== SIDEBAR ===================== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <h1>TransitOps</h1>
+            </div>
+
+            <!-- nav links — each carries a data-module used for RBAC gating in JS -->
+            <nav class="sidebar-nav" id="sidebarNav">
+                <a href="/dashboard"    class="nav-link" data-module="dashboard">    <span class="nav-icon">📊</span> Dashboard</a>
+                <a href="/fleet"        class="nav-link" data-module="vehicles">     <span class="nav-icon">🚍</span> Fleet</a>
+                <a href="/drivers"      class="nav-link" data-module="drivers">      <span class="nav-icon">👤</span> Drivers</a>
+                <a href="/trips"        class="nav-link" data-module="trips">        <span class="nav-icon">🗺️</span> Trips</a>
+                <a href="/maintenance"  class="nav-link active" data-module="maintenance"><span class="nav-icon">🔧</span> Maintenance</a>
+                <a href="/fuel-expenses" class="nav-link" data-module="fuel_expenses"><span class="nav-icon">⛽</span> Fuel & Expenses</a>
+                <a href="/analytics"   class="nav-link" data-module="reports">      <span class="nav-icon">📈</span> Analytics</a>
+                <a href="/settings"    class="nav-link" data-module="settings">     <span class="nav-icon">⚙️</span> Settings</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-sidebar-logout" id="logoutBtn">🚪 Logout</button>
+            </div>
+        </aside>
+        <!-- =================== END SIDEBAR =================== -->
+
+
+        <!-- ==================== MAIN CONTENT ==================== -->
+        <div class="main-content">
+
+            <!-- top bar: hamburger | search | user info -->
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Menu">☰</button>
+                <div class="topbar-search">
+                    <input
+                        type="text"
+                        class="search-input"
+                        id="globalSearch"
+                        placeholder="Search vehicles or service type..."
+                        aria-label="Search service records"
+                    >
+                </div>
+                <div class="topbar-actions">
+                    <span class="user-name" id="userName">User</span>
+                    <div class="role-badge" id="roleBadge">—</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+
+                <!-- inline feedback banner — shown/hidden by JS -->
+                <div id="pageBanner" class="maint-banner" role="alert" aria-live="polite"></div>
+
+                <!-- two-column layout: log form on the left, service history on the right -->
+                <div class="maint-layout">
+
+                    <!-- ---- LEFT: Log a new service record ---- -->
+                    <div class="panel maint-form-panel">
+                        <h3 class="panel-title">LOG SERVICE RECORD</h3>
+
+                        <form id="serviceForm" novalidate>
+
+                            <div class="form-group">
+                                <label for="serviceVehicle">VEHICLE</label>
+                                <select id="serviceVehicle" class="form-select" required>
+                                    <option value="" disabled selected>Select vehicle...</option>
+                                </select>
+                                <!-- per-field inline error shown by JS -->
+                                <span class="field-error" id="errVehicle"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="serviceType">SERVICE TYPE</label>
+                                <select id="serviceType" class="form-select" required>
+                                    <option value="" disabled selected>Select type...</option>
+                                    <option value="Oil Change">Oil Change</option>
+                                    <option value="Engine Repair">Engine Repair</option>
+                                    <option value="Tyre Replace">Tyre Replace</option>
+                                    <option value="Brake Service">Brake Service</option>
+                                    <option value="General Inspection">General Inspection</option>
+                                    <option value="Transmission Service">Transmission Service</option>
+                                    <option value="Battery Replacement">Battery Replacement</option>
+                                    <option value="AC Service">AC Service</option>
+                                </select>
+                                <span class="field-error" id="errServiceType"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="serviceCost">COST (₹)</label>
+                                <input
+                                    type="number"
+                                    id="serviceCost"
+                                    placeholder="e.g. 4000"
+                                    min="0"
+                                    step="0.01"
+                                >
+                                <span class="field-error" id="errCost"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="serviceDate">DATE</label>
+                                <input type="date" id="serviceDate">
+                                <span class="field-error" id="errDate"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="serviceStatus">STATUS</label>
+                                <select id="serviceStatus" class="form-select">
+                                    <option value="in_progress">In Shop</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="pending">Pending</option>
+                                </select>
+                            </div>
+
+                            <!-- submit shows a spinner while saving -->
+                            <button type="submit" class="btn-save-service" id="btnSaveService">
+                                Save
+                            </button>
+
+                        </form>
+                    </div>
+                    <!-- ---- END LEFT PANEL ---- -->
+
+
+                    <!-- ---- RIGHT: Service history log table ---- -->
+                    <div class="panel maint-log-panel">
+                        <h3 class="panel-title">SERVICE LOG</h3>
+
+                        <table class="data-table" id="serviceTable">
+                            <thead>
+                                <tr>
+                                    <th>VEHICLE</th>
+                                    <th>SERVICE</th>
+                                    <th>COST</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="serviceTableBody">
+                                <!-- rows injected by maintenance.js -->
+                                <tr>
+                                    <td colspan="4" class="loading-text">Loading records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- ---- END RIGHT PANEL ---- -->
+
+                </div>
+                <!-- end .maint-layout -->
+
+
+                <!-- business rules reminder at the bottom of the page -->
+                <div class="maint-rules">
+                    <div class="rule-row">
+                        <span class="rule-label available">Available</span>
+                        <span class="rule-arrow">━━━━━━ service logged ━━━━━━▶</span>
+                        <span class="rule-label in-shop">In Shop</span>
+                    </div>
+                    <div class="rule-row">
+                        <span class="rule-label in-shop">In Shop</span>
+                        <span class="rule-arrow">━━━━━━ service completed ━━━━▶</span>
+                        <span class="rule-label available">Available</span>
+                    </div>
+                    <p class="rule-note">note: In Shop vehicles are removed from the trip dispatcher pool.</p>
+                </div>
+
+            </div>
+            <!-- end .page-content -->
+
+        </div>
+        <!-- end .main-content -->
+
+    </div>
+    <!-- end .app-layout -->
+
+    <!-- all interactivity lives in the dedicated JS module -->
+    <script src="/js/maintenance.js"></script>
+</body>
+</html>

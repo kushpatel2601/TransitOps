@@ -1,0 +1,176 @@
+/*
+ * fuel-expenses.css
+ * -------------------------------------------
+ * Styles specific to the Fuel & Expenses page.
+ *
+ * Covers:
+ *  - Page header row (title + action buttons)
+ *  - Fuel logs and other expenses table panels
+ *  - Total operational cost summary bar
+ *  - Inline field-level error messages
+ *  - Page-level feedback banner
+ *  - Modal form padding overrides
+ *  - Responsive adjustments
+ * -------------------------------------------
+ */
+
+
+/* ---- Page feedback banner (success / error) ---- */
+
+.exp-banner {
+    /* hidden until JS adds a class */
+    display: none;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    margin-bottom: var(--space-lg);
+    animation: bannerSlide 0.25s ease;
+}
+
+.exp-banner.show-success {
+    display: block;
+    background-color: var(--color-success-bg);
+    color: var(--color-success);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.exp-banner.show-error {
+    display: block;
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+@keyframes bannerSlide {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ---- Header row: title on the left, buttons on the right ---- */
+
+.expense-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.section-title-m {
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* group the two action buttons side by side */
+.actions-group-row {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* both "+ Log Fuel" and "+ Add Expense" use the same style */
+.btn-action-exp {
+    background-color: var(--color-primary);
+    color: #1a1a2e;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-action-exp:hover {
+    background-color: #e0a800;
+    transform: translateY(-1px);
+}
+
+.btn-action-exp:active {
+    transform: translateY(0);
+}
+
+
+/* ---- Table panels (fuel logs + other expenses) ---- */
+
+.expense-panel {
+    margin-bottom: var(--space-xl);
+    /* allow horizontal scroll on narrow screens */
+    overflow-x: auto;
+}
+
+
+/* ---- Total cost summary bar at the very bottom ---- */
+
+.total-cost-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg) var(--space-xl);
+    margin-top: var(--space-xl);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+/* label on the left */
+.cost-summary-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+/* large amber number on the right */
+.cost-summary-value {
+    font-size: var(--font-size-lg);
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+
+/* ---- Inline field error messages inside modals ---- */
+
+/*
+ * These live inside the fuel modal and expense modal.
+ * JS sets the text and shows/clears them on validation.
+ */
+.field-error {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--color-danger);
+    margin-top: 0.2rem;
+    /* reserve height so the form doesn't jump when errors appear */
+    min-height: 1em;
+}
+
+/* red border applied by JS when a field fails validation */
+.form-group input.invalid,
+.form-group select.invalid {
+    border-color: var(--color-danger) !important;
+    box-shadow: 0 0 0 2px var(--color-danger-bg) !important;
+}
+
+
+/* ---- Responsive ---- */
+
+/* on small screens, stack the header row vertically */
+@media (max-width: 600px) {
+    .expense-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .total-cost-summary-row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--space-md);
+    }
+}

@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUserInfo();
     loadPageData();
     setupEvents();
+    setupSidebarToggle();
 });
 
 
@@ -348,16 +349,7 @@ function setupEvents() {
         });
     }
 
-    // Sidebar overlay toggle close
-    const overlay = document.getElementById('sidebarOverlay');
-    if (overlay) {
-        overlay.addEventListener('click', () => {
-            document.getElementById('sidebar').classList.remove('open');
-            overlay.classList.remove('visible');
-        });
-    }
-
-    // Logout button
+    // Logout button — clears token and returns to the sign-in page
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', logout);
@@ -484,6 +476,31 @@ function formatRoleName(role) {
     return nameMap[role] || role.split('_')
         .map(w => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
+}
+
+
+/**
+ * Wire the hamburger button to open/close the sidebar on mobile.
+ * The overlay behind the sidebar closes it on tap.
+ */
+function setupSidebarToggle() {
+    const sidebar   = document.getElementById('sidebar');
+    const overlay   = document.getElementById('sidebarOverlay');
+    const toggleBtn = document.getElementById('menuToggleBtn');
+
+    if (!toggleBtn || !sidebar || !overlay) return;
+
+    // toggle open/close on each press of the hamburger button
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('visible');
+    });
+
+    // tapping the dark backdrop also closes the sidebar
+    overlay.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+    });
 }
 
 

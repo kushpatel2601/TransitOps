@@ -399,24 +399,25 @@ function renderFallbackData() {
 // ---- Sidebar toggle (mobile) ----
 
 function setupSidebarToggle() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
+    const sidebar   = document.getElementById('sidebar');
+    const overlay   = document.getElementById('sidebarOverlay');
     const toggleBtn = document.getElementById('menuToggleBtn');
 
     if (!toggleBtn || !sidebar || !overlay) return;
 
+    // toggle open/close on each press of the hamburger button
     toggleBtn.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        overlay.classList.add('visible');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('visible');
     });
 
-    // close when clicking the backdrop
+    // tapping the dark backdrop also closes the sidebar
     overlay.addEventListener('click', () => {
         sidebar.classList.remove('open');
         overlay.classList.remove('visible');
     });
 
-    // close when clicking any nav link
+    // close when navigating via any sidebar link
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', () => {
             sidebar.classList.remove('open');
@@ -429,15 +430,14 @@ function setupSidebarToggle() {
 // ---- Logout ----
 
 function setupLogout() {
-    // no logout button in the new layout — role badge area
-    // but we'll add a click handler on the brand for "back to login"
-    // and listen for any element with id logoutBtn if it exists
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('transitops_token');
-            localStorage.removeItem('transitops_user');
-            window.location.href = '/';
-        });
+        logoutBtn.addEventListener('click', logout);
     }
+}
+
+function logout() {
+    localStorage.removeItem('transitops_token');
+    localStorage.removeItem('transitops_user');
+    window.location.href = '/';
 }
