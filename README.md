@@ -1,6 +1,29 @@
 <div align="center">
 
-# 🚛 TransitOps
+#   <div class="logo">
+  <div class="sq" style="background:#e8a33d"></div>
+  <div class="sq" style="background:#f6dfa3"></div>
+  <div class="sq" style="background:#f0c15c"></div>
+  <div class="sq" style="background:#f6dfa3"></div>
+</div>
+
+<style>
+  .logo {
+    width: 80px;
+    height: 80px;
+    background: #f0f0f0;
+    border-radius: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+  .sq {
+    border-radius: 8px;
+  }
+</style> TransitOps
 
 ### Smart Transport Operations Platform
 
