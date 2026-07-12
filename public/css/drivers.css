@@ -1,0 +1,114 @@
+/*
+ * drivers.css
+ * -------------------------------------------
+ * Styles specific to the Drivers & Safety
+ * Profiles page — status badges, totals row,
+ * and the business rule notice.
+ * -------------------------------------------
+ */
+
+
+/* Status badge colors — matches the wireframe design */
+.badge-available {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.badge-on-trip {
+    background-color: var(--color-primary);
+    color: var(--text-on-primary);
+}
+
+.badge-off-duty {
+    background-color: #636e72;
+    color: white;
+}
+
+.badge-suspended {
+    background-color: #e67e22;
+    color: white;
+}
+
+
+/* Expiry warning — highlights expired licenses in red */
+.license-expired {
+    color: var(--color-danger);
+    font-weight: 600;
+}
+
+.license-valid {
+    color: var(--text-secondary);
+}
+
+
+/* Totals stat row at the bottom of the table */
+.totals-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.totals-label {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: var(--space-sm);
+}
+
+.totals-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: white;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.totals-badge.badge-available  { background-color: var(--color-success); }
+.totals-badge.badge-on-trip    { background-color: #3498db; }
+.totals-badge.badge-off-duty   { background-color: #636e72; }
+.totals-badge.badge-suspended  { background-color: #e67e22; }
+
+
+/* Business rule notice at the bottom */
+.business-rule-notice {
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xs);
+    color: var(--color-danger);
+    border-left: 3px solid var(--color-danger);
+    background-color: rgba(231, 76, 60, 0.06);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-style: italic;
+}
+
+
+/* Safety score styling */
+.safety-high  { color: var(--color-success); font-weight: 700; }
+.safety-mid   { color: #e67e22; font-weight: 700; }
+.safety-low   { color: var(--color-danger); font-weight: 700; }
+
+
+/* Action buttons inside table rows */
+.btn-edit-row,
+.btn-delete-row {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast);
+}
+
+.btn-edit-row:hover   { background-color: rgba(255, 255, 255, 0.08); }
+.btn-delete-row:hover { background-color: rgba(231, 76, 60, 0.15); }

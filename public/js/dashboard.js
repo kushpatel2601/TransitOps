@@ -181,9 +181,10 @@ function renderRecentTrips(trips) {
         // driver name or dash if unassigned
         const driver = trip.driver_name || '—';
 
-        // format the status for display
-        const statusClass = getStatusClass(trip.status);
-        const statusText = formatStatus(trip.status);
+        // format the status for display (show vehicle's current status, matching Fleet status)
+        const vStatus = trip.vehicle_status || trip.status;
+        const statusClass = getVehicleStatusClass(vStatus);
+        const statusText = formatVehicleStatus(vStatus);
 
         // calculate ETA — for active trips, show time remaining
         const eta = calculateETA(trip);
@@ -252,7 +253,45 @@ function renderVehicleStatus(statuses) {
 }
 
 
-// ---- Helper functions ----
+/**
+ * Map vehicle status (from Fleet page) to a CSS class matching the dashboard status badges.
+ */
+function getVehicleStatusClass(status) {
+    const classMap = {
+        'available': 'completed',       // Green badge
+        'active': 'on-trip',            // Blue badge
+        'maintenance': 'delayed',       // Orange badge
+        'inactive': 'cancelled',        // Red badge
+        
+        // fallback matching trip statuses
+        'in_progress': 'on-trip',
+        'completed': 'completed',
+        'scheduled': 'dispatched',
+        'cancelled': 'cancelled',
+        'delayed': 'delayed'
+    };
+    return classMap[status] || 'draft';
+}
+
+/**
+ * Format a vehicle status (from Fleet page) for human-readable display.
+ */
+function formatVehicleStatus(status) {
+    const displayMap = {
+        'available': 'Available',
+        'active': 'On Trip',
+        'maintenance': 'In Shop',
+        'inactive': 'Retired',
+        
+        // fallback matching trip statuses
+        'in_progress': 'On Trip',
+        'completed': 'Completed',
+        'scheduled': 'Dispatched',
+        'cancelled': 'Cancelled',
+        'delayed': 'Delayed'
+    };
+    return displayMap[status] || 'Available';
+}
 
 /**
  * Map trip status to a CSS class for the colored badge.

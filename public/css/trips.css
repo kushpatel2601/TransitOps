@@ -1,0 +1,270 @@
+/*
+ * trips.css
+ * -------------------------------------------
+ * Styles for the Trip Dispatcher module.
+ * -------------------------------------------
+ */
+
+.dispatch-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    align-items: start;
+}
+
+@media (max-width: 992px) {
+    .dispatch-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ---- Lifecycle Progress Indicator ---- */
+.lifecycle-indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    margin-bottom: var(--space-lg);
+    padding: 0 var(--space-md);
+}
+
+.lifecycle-indicator::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: var(--space-lg);
+    right: var(--space-lg);
+    height: 2px;
+    background-color: var(--border-color);
+    z-index: 1;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+}
+
+.step-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    border: 3px solid var(--bg-card);
+    transition: all var(--transition-fast);
+}
+
+.step-label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-top: var(--space-xs);
+    transition: color var(--transition-fast);
+}
+
+/* Active & complete state colors */
+.step-item.active .step-dot {
+    background-color: var(--color-primary);
+    box-shadow: 0 0 10px rgba(212, 160, 23, 0.4);
+}
+
+.step-item.active .step-label {
+    color: var(--text-primary);
+}
+
+.step-item.completed .step-dot {
+    background-color: var(--color-success);
+}
+
+.step-item.cancelled .step-dot {
+    background-color: var(--color-danger);
+}
+
+
+/* ---- Create Trip Form ---- */
+.dispatch-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.form-row {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.half-width {
+    flex: 1;
+}
+
+.form-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    margin-top: var(--space-sm);
+}
+
+
+/* ---- Weight Validation Box ---- */
+.validation-warning-card {
+    padding: var(--space-md);
+    background-color: rgba(231, 76, 60, 0.08);
+    border: 1px solid rgba(231, 76, 60, 0.25);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all var(--transition-normal);
+}
+
+.validation-warning-card.hidden {
+    display: none;
+}
+
+.warn-line {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.error-highlight {
+    color: var(--color-danger);
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+    margin-top: 4px;
+}
+
+.success-highlight {
+    color: var(--color-success);
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+    margin-top: 4px;
+}
+
+.validation-warning-card.success-mode {
+    background-color: rgba(46, 204, 113, 0.08);
+    border-color: rgba(46, 204, 113, 0.25);
+}
+
+
+/* ---- Live Board List ---- */
+.liveboard-panel {
+    display: flex;
+    flex-direction: column;
+    max-height: 750px;
+}
+
+.liveboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    overflow-y: auto;
+    padding-right: var(--space-xs);
+    flex: 1;
+}
+
+/* Trip card item */
+.trip-card {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all var(--transition-fast);
+}
+
+.trip-card:hover {
+    border-color: var(--border-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trip-card-left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.trip-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.trip-card-id {
+    font-family: monospace;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.trip-card-route {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.trip-card-details {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.trip-card-eta {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.trip-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-sm);
+}
+
+/* Action controls within the card */
+.trip-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-action-small {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background: none;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.btn-action-small.complete:hover {
+    border-color: var(--color-success);
+    color: var(--color-success);
+    background-color: rgba(46, 204, 113, 0.08);
+}
+
+.btn-action-small.cancel:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+    background-color: rgba(231, 76, 60, 0.08);
+}
+
+
+/* Footer styling for Live Board */
+.liveboard-footer {
+    margin-top: var(--space-lg);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    font-style: italic;
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--space-md);
+}

@@ -32,13 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         verifyExistingToken(token);
     }
 
-    // restore remembered email if it was saved
-    const savedEmail = localStorage.getItem('transitops_email');
-    if (savedEmail) {
-        emailInput.value = savedEmail;
-        // focus the password field since email is already filled
-        passwordInput.focus();
-    }
+    // Do not pre-fill email to keep the input empty on page load.
 });
 
 
@@ -220,3 +214,72 @@ function setLoading(isLoading) {
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+// ---- Forgot Password Modal Listeners ----
+const forgotLink = document.getElementById('forgotPasswordLink');
+const forgotModal = document.getElementById('forgotPasswordModal');
+const btnForgotClose = document.getElementById('btnForgotModalClose');
+const btnForgotCancel = document.getElementById('btnForgotCancel');
+const btnForgotDone = document.getElementById('btnForgotDone');
+const forgotForm = document.getElementById('forgotPasswordForm');
+const forgotSuccess = document.getElementById('forgotSuccessMessage');
+const recoveryEmail = document.getElementById('recoveryEmail');
+const btnForgotSubmit = document.getElementById('btnForgotSubmit');
+
+if (forgotLink && forgotModal) {
+    forgotLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        forgotModal.classList.add('open');
+        forgotForm.style.display = 'block';
+        forgotSuccess.style.display = 'none';
+        if (emailInput && emailInput.value) {
+            recoveryEmail.value = emailInput.value;
+        } else {
+            recoveryEmail.value = '';
+        }
+        recoveryEmail.focus();
+    });
+}
+
+const closeForgotModal = () => {
+    if (forgotModal) {
+        forgotModal.classList.remove('open');
+    }
+};
+
+if (btnForgotClose) btnForgotClose.addEventListener('click', closeForgotModal);
+if (btnForgotCancel) btnForgotCancel.addEventListener('click', closeForgotModal);
+if (btnForgotDone) btnForgotDone.addEventListener('click', closeForgotModal);
+
+if (forgotForm) {
+    forgotForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = recoveryEmail.value.trim();
+        
+        if (!email || !isValidEmail(email)) {
+            alert('Please enter a valid email address.');
+            recoveryEmail.focus();
+            return;
+        }
+
+        // Show loading state
+        btnForgotSubmit.disabled = true;
+        btnForgotSubmit.textContent = 'Sending...';
+
+        // Mock network delay (500ms) to make it feel responsive and alive
+        setTimeout(() => {
+            btnForgotSubmit.disabled = false;
+            btnForgotSubmit.textContent = 'Send Link';
+            
+            // Swap form to success state
+            forgotForm.style.display = 'none';
+            forgotSuccess.style.display = 'block';
+            
+            const successText = document.getElementById('forgotSuccessText');
+            if (successText) {
+                successText.innerHTML = `We've sent a password reset link to <strong>${email}</strong>.<br><br><span style="font-size: 0.85rem; color: var(--text-muted);">Demo notice: For this hackathon environment, you can sign in to any default account with the password <strong>password123</strong>.</span>`;
+            }
+        }, 600);
+    });
+}
+

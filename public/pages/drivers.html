@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TransitOps Drivers & Safety — Manage driver profiles, license tracking, safety scores, and trip compliance.">
+    <title>TransitOps — Drivers & Safety</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/fleet.css">
+    <link rel="stylesheet" href="/css/drivers.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚍</text></svg>">
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="app-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand"><h1>TransitOps</h1></div>
+            <nav class="sidebar-nav" id="sidebarNav">
+                <a href="/dashboard" class="nav-link" data-module="dashboard"><span class="nav-icon">📊</span> Dashboard</a>
+                <a href="/fleet" class="nav-link" data-module="vehicles"><span class="nav-icon">🚍</span> Fleet</a>
+                <a href="/drivers" class="nav-link active" data-module="drivers"><span class="nav-icon">👤</span> Drivers</a>
+                <a href="/trips" class="nav-link" data-module="trips"><span class="nav-icon">🗺️</span> Trips</a>
+                <a href="/maintenance" class="nav-link" data-module="maintenance"><span class="nav-icon">🔧</span> Maintenance</a>
+                <a href="/fuel-expenses" class="nav-link" data-module="fuel_expenses"><span class="nav-icon">⛽</span> Fuel & Expenses</a>
+                <a href="/analytics" class="nav-link" data-module="reports"><span class="nav-icon">📈</span> Analytics</a>
+                <a href="/settings" class="nav-link" data-module="settings"><span class="nav-icon">⚙️</span> Settings</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-sidebar-logout" id="logoutBtn">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Menu">☰</button>
+                <div class="topbar-search">
+                    <input type="text" class="search-input" id="globalSearch" placeholder="Search..." aria-label="Search">
+                </div>
+                <div class="topbar-actions">
+                    <span class="user-name" id="userName">User</span>
+                    <div class="role-badge" id="roleBadge">—</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+
+                <!-- Toolbar with Add Driver button -->
+                <div class="toolbar-row">
+                    <div class="filters-group">
+                        <!-- no extra filters needed for drivers besides the search -->
+                    </div>
+                    <button class="btn-add-vehicle" id="btnAddDriver">
+                        <span class="plus-icon">+</span> Add Driver
+                    </button>
+                </div>
+
+                <!-- Driver Table -->
+                <div class="panel fleet-panel">
+                    <table class="data-table" id="driverTable">
+                        <thead>
+                            <tr>
+                                <th>DRIVER</th>
+                                <th>LICENSE ID</th>
+                                <th>CATEGORY</th>
+                                <th>REPORT</th>
+                                <th>CONTACT</th>
+                                <th>TRIP COMP.</th>
+                                <th>SAFETY</th>
+                                <th>STATUS</th>
+                                <th class="text-right">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="driverTableBody">
+                            <tr><td colspan="9" class="loading-text">Loading drivers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Status summary badges -->
+                <div class="totals-stat" id="totalsRow">
+                    <span class="totals-label">TOTALS STAT</span>
+                    <!-- populated by JS -->
+                </div>
+
+                <!-- Business rule -->
+                <div class="business-rule-notice">
+                    Rule: Expired license or Suspended status → Blocked from trip assignment
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Driver Modal -->
+    <div class="modal" id="driverModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add New Driver</h3>
+                <button class="modal-close" id="btnModalClose">&times;</button>
+            </div>
+            <form id="driverForm">
+                <input type="hidden" id="driverId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="driverName">Full Name *</label>
+                        <input type="text" id="driverName" required placeholder="e.g. Alex">
+                    </div>
+                    <div class="form-group">
+                        <label for="licenseNo">License ID *</label>
+                        <input type="text" id="licenseNo" required placeholder="e.g. DL-87225">
+                    </div>
+                    <div class="form-group">
+                        <label for="licenseExpiry">License Expiry</label>
+                        <input type="date" id="licenseExpiry">
+                    </div>
+                    <div class="form-group">
+                        <label for="driverPhone">Contact Number</label>
+                        <input type="tel" id="driverPhone" placeholder="e.g. 9876500000">
+                    </div>
+                    <div class="form-group">
+                        <label for="driverEmail">Email</label>
+                        <input type="email" id="driverEmail" placeholder="e.g. alex@transitops.in">
+                    </div>
+                    <div class="form-group">
+                        <label for="safetyScore">Safety Score (%)</label>
+                        <input type="number" id="safetyScore" min="0" max="100" step="0.1" placeholder="e.g. 96">
+                    </div>
+                    <div class="form-group">
+                        <label for="driverStatus">Status *</label>
+                        <select id="driverStatus" required>
+                            <option value="active">Available</option>
+                            <option value="on_leave">Off Duty</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="btnCancel">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btnSave">Save Driver</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/drivers.js"></script>
+</body>
+</html>

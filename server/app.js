@@ -37,9 +37,13 @@ app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 // vehicle registry routes
 app.use('/api/vehicles', require('./routes/vehicleRoutes'));
 
+// driver & safety profile routes
+app.use('/api/drivers', require('./routes/driverRoutes'));
+
+// trip dispatching routes
+app.use('/api/trips', require('./routes/tripRoutes'));
+
 // TODO: add remaining route modules as we build them
-// app.use('/api/drivers', require('./routes/driverRoutes'));
-// app.use('/api/trips', require('./routes/tripRoutes'));
 // app.use('/api/maintenance', require('./routes/maintenanceRoutes'));
 // app.use('/api/fuel', require('./routes/fuelRoutes'));
 // app.use('/api/expenses', require('./routes/expenseRoutes'));
@@ -61,6 +65,14 @@ app.get('/dashboard', (req, res) => {
 
 app.get('/fleet', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'fleet.html'));
+});
+
+app.get('/drivers', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'drivers.html'));
+});
+
+app.get('/trips', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'pages', 'trips.html'));
 });
 
 // catch-all: redirect unknown routes to login

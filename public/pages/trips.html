@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TransitOps Trip Dispatcher — Dispatch new trips, validate cargo weight capacity limits, and monitor the Live Board.">
+    <title>TransitOps — Trip Dispatcher</title>
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/fleet.css">
+    <link rel="stylesheet" href="/css/trips.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="app-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand"><h1>TransitOps</h1></div>
+            <nav class="sidebar-nav" id="sidebarNav">
+                <a href="/dashboard" class="nav-link" data-module="dashboard"><span class="nav-icon">📊</span> Dashboard</a>
+                <a href="/fleet" class="nav-link" data-module="vehicles"><span class="nav-icon">🚍</span> Fleet</a>
+                <a href="/drivers" class="nav-link" data-module="drivers"><span class="nav-icon">👤</span> Drivers</a>
+                <a href="/trips" class="nav-link active" data-module="trips"><span class="nav-icon">🗺️</span> Trips</a>
+                <a href="/maintenance" class="nav-link" data-module="maintenance"><span class="nav-icon">🔧</span> Maintenance</a>
+                <a href="/fuel-expenses" class="nav-link" data-module="fuel_expenses"><span class="nav-icon">⛽</span> Fuel & Expenses</a>
+                <a href="/analytics" class="nav-link" data-module="reports"><span class="nav-icon">📈</span> Analytics</a>
+                <a href="/settings" class="nav-link" data-module="settings"><span class="nav-icon">⚙️</span> Settings</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-sidebar-logout" id="logoutBtn">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Menu">☰</button>
+                <div class="topbar-search">
+                    <input type="text" class="search-input" id="globalSearch" placeholder="Search trips..." aria-label="Search">
+                </div>
+                <div class="topbar-actions">
+                    <span class="user-name" id="userName">User</span>
+                    <div class="role-badge" id="roleBadge">—</div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="dispatch-container">
+
+                    <!-- Left Column: Create Trip Form -->
+                    <div class="panel form-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">CREATE TRIP</h2>
+                        </div>
+
+                        <!-- Trip Lifecycle Indicator -->
+                        <div class="lifecycle-indicator">
+                            <div class="step-item active" data-status="draft">
+                                <span class="step-dot"></span>
+                                <span class="step-label">Draft</span>
+                            </div>
+                            <div class="step-item" data-status="in_progress">
+                                <span class="step-dot"></span>
+                                <span class="step-label">Dispatched</span>
+                            </div>
+                            <div class="step-item" data-status="completed">
+                                <span class="step-dot"></span>
+                                <span class="step-label">Completed</span>
+                            </div>
+                            <div class="step-item" data-status="cancelled">
+                                <span class="step-dot"></span>
+                                <span class="step-label">Cancelled</span>
+                            </div>
+                        </div>
+
+                        <form id="dispatchForm" class="dispatch-form">
+                            <div class="form-group">
+                                <label class="form-label" for="source">Source *</label>
+                                <input type="text" class="form-input" id="source" required placeholder="e.g. Gandhinagar Depot">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="destination">Destination *</label>
+                                <input type="text" class="form-input" id="destination" required placeholder="e.g. Ahmedabad Hub">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="vehicleSelect">Vehicle (Available Only) *</label>
+                                <select class="form-select" id="vehicleSelect" required>
+                                    <option value="" disabled selected>Select available vehicle...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="driverSelect">Driver (Available Only) *</label>
+                                <select class="form-select" id="driverSelect" required>
+                                    <option value="" disabled selected>Select available driver...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half-width">
+                                    <label class="form-label" for="cargoWeight">Cargo Weight (kg) *</label>
+                                    <input type="number" class="form-input" id="cargoWeight" required min="1" placeholder="e.g. 700">
+                                </div>
+                                <div class="form-group half-width">
+                                    <label class="form-label" for="distance">Planned Distance (km)</label>
+                                    <input type="number" class="form-input" id="distance" min="1" placeholder="e.g. 45">
+                                </div>
+                            </div>
+
+                            <!-- Real-time weight validation feedback card -->
+                            <div class="validation-warning-card hidden" id="validationCard">
+                                <div class="warn-line" id="infoVehicleCapacity">Vehicle Capacity: — kg</div>
+                                <div class="warn-line" id="infoCargoWeight">Cargo Weight: — kg</div>
+                                <div class="warn-line error-highlight" id="warnResult">
+                                    ❌ Capacity exceeded by — kg — dispatch blocked!
+                                </div>
+                            </div>
+
+                            <div class="form-actions-row">
+                                <button type="button" class="btn-secondary" id="btnCancelForm">Cancel</button>
+                                <button type="submit" class="btn-primary" id="btnDispatch">Dispatch</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right Column: Live Board -->
+                    <div class="panel liveboard-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">LIVE BOARD</h2>
+                        </div>
+                        
+                        <div class="liveboard-list" id="liveboardList">
+                            <div class="loading-text">Loading trips...</div>
+                        </div>
+
+                        <div class="liveboard-footer">
+                            💡 On Complete: odometer &rarr; fuel log &rarr; expenses &rarr; Vehicle & Driver available
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/trips.js"></script>
+</body>
+</html>

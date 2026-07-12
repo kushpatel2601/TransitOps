@@ -93,13 +93,15 @@ CREATE TABLE drivers (
     license_expiry  DATE,
     phone           VARCHAR(20),
     email           VARCHAR(150),
-    status          VARCHAR(20) DEFAULT 'active',  -- active | on_leave | suspended
-    safety_score    DECIMAL(4, 2) DEFAULT 100.00,  -- out of 100
-    total_trips     INTEGER DEFAULT 0,
-    violations      INTEGER DEFAULT 0,
-    joined_date     DATE DEFAULT CURRENT_DATE,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    status              VARCHAR(20) DEFAULT 'active',  -- active | on_leave | suspended
+    safety_score        DECIMAL(4, 2) DEFAULT 100.00,  -- out of 100
+    license_category    VARCHAR(20) DEFAULT 'LMV',
+    trip_completion_rate DECIMAL(5, 2) DEFAULT 100.00,
+    total_trips         INTEGER DEFAULT 0,
+    violations          INTEGER DEFAULT 0,
+    joined_date         DATE DEFAULT CURRENT_DATE,
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
