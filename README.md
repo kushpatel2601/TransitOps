@@ -1,7 +1,7 @@
 <div align="center">
 
 #  <img width="65" height="53" alt="Screenshot 2026-07-12 165549" src="https://github.com/user-attachments/assets/48f2635e-af37-4008-9a12-a8df16db11de" />
-TransitOps
+# TransitOps
 
 ### Smart Transport Operations Platform
 
