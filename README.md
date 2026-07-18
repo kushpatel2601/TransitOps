@@ -277,8 +277,6 @@ MIT — free to use, fork, and build on.
 
 <div align="center">
 
-**[🔗 Try the Live Demo](https://transit-ops-xi.vercel.app/)**
-
 Made with ❤️ for Odoo Hackathon 2026
 
 </div>
